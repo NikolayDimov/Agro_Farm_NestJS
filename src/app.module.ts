@@ -11,6 +11,7 @@ import { APP_PIPE } from '@nestjs/core';
 import { FarmModule } from './farm/farm.module';
 import { CountryModule } from './country/country.module';
 import { Farm } from './farm/farm.entity';
+import { Country } from './country/country.entity';
 // import cookieSession from 'cookie-session';   // import cookieSession not work for nestjs
 const cookieSession = require('cookie-session');
 
@@ -30,7 +31,7 @@ const cookieSession = require('cookie-session');
                     username: config.get<string>('USERNAME'),
                     password: config.get<string>('PASSWORD'),
                     database: config.get<string>('DB_NAME'),
-                    entities: [User, Report, Farm],
+                    entities: [User, Report, Farm, Country],
                     synchronize: true,
                 };
             },
