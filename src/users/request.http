@@ -1,0 +1,88 @@
+### Create a new user
+POST http://localhost:3000/auth/signup
+Content-Type: application/json
+
+{
+    "email": "abv4@abv.com",
+    "password": "wertyuiop44"
+}
+
+### Create a new user
+POST http://localhost:3000/auth/signup
+Content-Type: application/json
+
+{
+    "email": "test1@abv.com",
+    "password": "123456"
+}
+
+### Create a Admin new user
+POST http://localhost:3000/auth/signup
+Content-Type: application/json
+
+{
+    "email": "admin@abv.com",
+    "password": "11111"
+}
+
+### Login user
+POST http://localhost:3000/auth/signin
+Content-Type: application/json
+
+{
+    "email": "test1@abv.com",
+    "password": "123456"
+}
+
+
+### Login user
+POST http://localhost:3000/auth/signin
+Content-Type: application/json
+
+{
+    "email": "abv4@abv.com",
+    "password": "wertyuiop44"
+}
+
+
+### Get currently signed in user (whoAmI from user.controller)
+GET http://localhost:3000/auth/whoami
+
+### Signout
+POST http://localhost:3000/auth/signout
+
+### Find a particular user with a given ID
+GET http://localhost:3000/auth/1
+
+### Find all users with a given email
+GET http://localhost:3000/auth?email=abv@abv.com
+
+### Delete a user given id
+DELETE http://localhost:3000/auth/7
+
+### Update a user (email only)
+PATCH  http://localhost:3000/auth/2
+Content-Type: application/json
+
+{
+    "email": "aaa@bbb.com"
+}
+
+
+### Update a user (pass only)
+PATCH  http://localhost:3000/auth/2
+Content-Type: application/json
+
+{
+    "password": "12345"
+}
+
+
+### Update a user (email and pass)
+PATCH  http://localhost:3000/auth/2
+Content-Type: application/json
+
+{
+    "email": "aav@bbv.com",
+    "password": "123vv4"
+}
