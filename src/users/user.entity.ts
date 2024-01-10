@@ -1,5 +1,6 @@
 import { AfterInsert, AfterRemove, AfterUpdate, Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import { Report } from "../reports/report.entity";
+import { Farm } from '../farm/farm.entity'
 
 
 @Entity()
@@ -18,6 +19,9 @@ export class User {
 
     @OneToMany(() => Report, (report) => report.user)
     reports: Report[];
+
+    @OneToMany(() => Farm, (farm) => farm.user)
+    farms: Farm[];
 
     @AfterInsert()
     logInsert() {

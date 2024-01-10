@@ -8,6 +8,8 @@ import { ReportsModule } from './reports/reports.module';
 import { User } from './users/user.entity';
 import { Report } from './reports/report.entity';
 import { APP_PIPE } from '@nestjs/core';
+import { FarmModule } from './farm/farm.module';
+import { CountryModule } from './country/country.module';
 // import cookieSession from 'cookie-session';   // import cookieSession not work for nestjs
 const cookieSession = require('cookie-session');
 
@@ -44,6 +46,8 @@ const cookieSession = require('cookie-session');
         // }),
         UsersModule,
         ReportsModule,
+        FarmModule,
+        CountryModule,
     ],
     controllers: [AppController],
     providers: [
