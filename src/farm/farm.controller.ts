@@ -1,5 +1,5 @@
 import { Controller, Post, Body, UseGuards, Patch, Param, Get, Query } from '@nestjs/common';
-import { CreateReportDto } from './dtos/create-farm.dto';
+import { CreateFarmDto } from './dtos/create-farm.dto';
 import { FarmService } from './farm.service';
 import { AuthGuard } from '../guards/auth.guard';
 import { CurrentUser } from '../users/decorators/current-user.decorators';
@@ -18,14 +18,14 @@ export class FarmController {
     @Post()
     @UseGuards(AuthGuard)
     @Serialize(ReportDto)
-    createFarm(@Body() body: CreateReportDto, @CurrentUser() user: User) {
+    createFarm(@Body() body: CreateFarmDto, @CurrentUser() user: User) {
         return this.farmService.create(body, user);
     }
 
     @Patch('/:id')
     @UseGuards(AdminGuard)
     @Serialize(ReportDto)
-    updateFarm(@Body() body: CreateReportDto, @CurrentUser() user: User) {
+    updateFarm(@Body() body: CreateFarmDto, @CurrentUser() user: User) {
         return this.farmService.create(body, user);
     }
 }

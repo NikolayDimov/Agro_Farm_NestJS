@@ -10,6 +10,6 @@ export class Farm {
     name: string;
 
 
-    @ManyToOne(() => User, (user) => user.reports)
+    @ManyToOne(() => User, (user) => user.farms)
     user: User;
 }

@@ -1,7 +1,7 @@
 import { IsString, IsNumber, Min, Max, IsLongitude, IsLatitude } from "class-validator";
 
 
-export class CreateReportDto {
+export class CreateFarmDto {
     @IsString()
     name: string;
 

@@ -10,6 +10,7 @@ import { Report } from './reports/report.entity';
 import { APP_PIPE } from '@nestjs/core';
 import { FarmModule } from './farm/farm.module';
 import { CountryModule } from './country/country.module';
+import { Farm } from './farm/farm.entity';
 // import cookieSession from 'cookie-session';   // import cookieSession not work for nestjs
 const cookieSession = require('cookie-session');
 
@@ -29,7 +30,7 @@ const cookieSession = require('cookie-session');
                     username: config.get<string>('USERNAME'),
                     password: config.get<string>('PASSWORD'),
                     database: config.get<string>('DB_NAME'),
-                    entities: [User, Report],
+                    entities: [User, Report, Farm],
                     synchronize: true,
                 };
             },

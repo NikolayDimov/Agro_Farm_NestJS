@@ -1,6 +1,6 @@
 import { AfterInsert, AfterRemove, AfterUpdate, Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import { Report } from "../reports/report.entity";
-import { Farm } from '../farm/farm.entity'
+import { Farm } from '../farm/farm.entity';
 
 
 @Entity()
