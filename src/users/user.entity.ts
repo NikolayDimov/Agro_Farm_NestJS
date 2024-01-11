@@ -10,14 +10,9 @@ import {
     UpdateDateColumn,
     DeleteDateColumn,
 } from "typeorm";
-import { Report } from "../reports/report.entity";
-// import { Farm } from '../farm/farm.entity';
+import { UserRole } from "../auth/dtos/enum";
 
-enum UserRole {
-    OWNER = "OWNER",
-    OPERATOR = "OPERATOR",
-    VIEWER = "VIEWER",
-}
+
 
 @Entity()
 export class User {
@@ -45,9 +40,7 @@ export class User {
     @DeleteDateColumn({ type: "timestamp", nullable: true })
     deleted: Date;
 
-    @OneToMany(() => Report, (report) => report.user)
-    reports: Report[];
-
+    // Not connect user and farm
     // @OneToMany(() => Farm, (farm) => farm.user)
     // farms: Farm[];
 
