@@ -12,8 +12,7 @@ import { FarmModule } from './farm/farm.module';
 import { CountryModule } from './country/country.module';
 import { Farm } from './farm/farm.entity';
 import { Country } from './country/country.entity';
-// import cookieSession from 'cookie-session';   // import cookieSession not work for nestjs
-const cookieSession = require('cookie-session');
+import { AuthModule } from './auth/auth.module';
 
 @Module({
     imports: [
@@ -36,20 +35,12 @@ const cookieSession = require('cookie-session');
                 };
             },
         }),
-        // TypeOrmModule.forRoot({
-        //     type: 'postgres',
-        //     host: 'localhost',
-        //     port: 5432,
-        //     username: 'postgres',
-        //     password: 'postgres',
-        //     database: 'carPricingNestJS',
-        //     entities: [User, Report],
-        //     synchronize: true, // only for dev environment, not production
-        // }),
+  
         UsersModule,
         ReportsModule,
         FarmModule,
         CountryModule,
+        AuthModule,
     ],
     controllers: [AppController],
     providers: [
@@ -63,9 +54,6 @@ const cookieSession = require('cookie-session');
     ],
 })
 export class AppModule {
-    constructor(private configService: ConfigService) {}
+   
 
-    configure(consumer: MiddlewareConsumer) {
-        consumer.apply(cookieSession({ keys: [this.configService.get('COOKIE_KEY')] })).forRoutes('*');
-    }
 }

@@ -15,6 +15,11 @@ export class UsersService {
 		// there is console.log in terminal from user.entity
 	}
 
+
+	// async findOne(username: string): Promise<User | undefined> {
+	// 	return this.users.find(user => user.username === username);
+	//   }
+
 	findOne(id: number) {
 		if(!id) {
 			return null;

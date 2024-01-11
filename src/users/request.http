@@ -1,14 +1,14 @@
 ### Create a new user
-POST http://localhost:3000/auth/signup
+POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-    "email": "abv4@abv.com",
-    "password": "wertyuiop44"
+    "email": "abv1@abv.com",
+    "password": "123456"
 }
 
 ### Create a new user
-POST http://localhost:3000/auth/signup
+POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -16,8 +16,17 @@ Content-Type: application/json
     "password": "123456"
 }
 
+### Create a new user
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+    "email": "test2@abv.com",
+    "password": "123456"
+}
+
 ### Create a Admin new user
-POST http://localhost:3000/auth/signup
+POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -26,7 +35,7 @@ Content-Type: application/json
 }
 
 ### Login user
-POST http://localhost:3000/auth/signin
+POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -36,17 +45,17 @@ Content-Type: application/json
 
 
 ### Login user
-POST http://localhost:3000/auth/signin
+POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-    "email": "abv4@abv.com",
-    "password": "wertyuiop44"
+    "email": "abv1@abv.com",
+    "password": "123456"
 }
 
 
 ### Get currently signed in user (whoAmI from user.controller)
-GET http://localhost:3000/auth/whoami
+GET http://localhost:3000/auth/currentUser
 
 ### Signout
 POST http://localhost:3000/auth/signout
