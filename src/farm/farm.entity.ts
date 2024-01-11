@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from "typeorm";
 import { User } from "../users/user.entity";
 import { Country } from '../country/country.entity';
 
@@ -9,6 +9,15 @@ export class Farm {
 
     @Column()
     name: string;
+
+    @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+    created: Date;
+
+    @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP" })
+    updated: Date;
+
+    @DeleteDateColumn({ type: "timestamp", nullable: true })
+    deleted: Date;
 
 
     // @ManyToOne(() => User, (user) => user.farms)
