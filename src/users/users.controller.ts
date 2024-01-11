@@ -73,15 +73,15 @@ export class UsersController {
 
     // @UseInterceptors(new SerializerInterceptor(UserDto)) // no password return with Get method
     // @Serialize(UserDto)
-    @Get("/:id")
-    async findUser(@Param("id") id: string) {
-        // console.log('handler is running');
-        const user = await this.userService.findOne(parseInt(id));
-        if (!user) {
-            throw new NotFoundException("user not found");
-        }
-        return user;
-    }
+    // @Get("/:id")
+    // async findUser(@Param("id") id: string) {
+    //     // console.log('handler is running');
+    //     const user = await this.userService.findOne(parseInt(id));
+    //     if (!user) {
+    //         throw new NotFoundException("user not found");
+    //     }
+    //     return user;
+    // }
 
     // @Serialize(UserDto)     // no password return for user
     @Get()
@@ -89,13 +89,13 @@ export class UsersController {
         return this.userService.find(email);
     }
 
-    @Delete("/:id")
-    removeUser(@Param("id") id: string) {
-        return this.userService.remove(parseInt(id));
-    }
+    // @Delete("/:id")
+    // removeUser(@Param("id") id: string) {
+    //     return this.userService.remove(parseInt(id));
+    // }
 
-    @Patch("/:id")
-    updateUser(@Param("id") id: string, @Body() body: UpdateuserDto) {
-        return this.userService.update(parseInt(id), body);
-    }
+    // @Patch("/:id")
+    // updateUser(@Param("id") id: string, @Body() body: UpdateuserDto) {
+    //     return this.userService.update(parseInt(id), body);
+    // }
 }

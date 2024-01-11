@@ -11,8 +11,8 @@ export class Farm {
     name: string;
 
 
-    @ManyToOne(() => User, (user) => user.farms)
-    user: User;
+    // @ManyToOne(() => User, (user) => user.farms)
+    // user: User;
 
     @ManyToOne(() => Country, (country) => country.farms)
     country: Country;

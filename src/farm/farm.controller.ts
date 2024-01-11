@@ -14,18 +14,32 @@ import { AdminGuard } from '../guards/admin.guards';
 export class FarmController {
     constructor(private farmService: FarmService) {}
 
+    // With farm-user connection
+    // @Post()
+    // @UseGuards(AuthGuard)
+    // @Serialize(ReportDto)
+    // createFarm(@Body() body: CreateFarmDto, @CurrentUser() user: User) {
+    //     return this.farmService.create(body, user);
+    // }
+
+    // @Patch('/:id')
+    // @UseGuards(AdminGuard)
+    // @Serialize(ReportDto)
+    // updateFarm(@Body() body: CreateFarmDto, @CurrentUser() user: User) {
+    //     return this.farmService.create(body, user);
+    // }
 
     @Post()
     @UseGuards(AuthGuard)
     @Serialize(ReportDto)
-    createFarm(@Body() body: CreateFarmDto, @CurrentUser() user: User) {
-        return this.farmService.create(body, user);
+    createFarm(@Body() body: CreateFarmDto) {
+        return this.farmService.create(body);
     }
 
     @Patch('/:id')
     @UseGuards(AdminGuard)
     @Serialize(ReportDto)
-    updateFarm(@Body() body: CreateFarmDto, @CurrentUser() user: User) {
-        return this.farmService.create(body, user);
+    updateFarm(@Body() body: CreateFarmDto) {
+        return this.farmService.create(body);
     }
 }

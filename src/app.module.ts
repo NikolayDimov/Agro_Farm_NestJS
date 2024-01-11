@@ -13,6 +13,9 @@ import { CountryModule } from './country/country.module';
 import { Farm } from './farm/farm.entity';
 import { Country } from './country/country.entity';
 import { AuthModule } from './auth/auth.module';
+import { AuthGuard } from './auth/auth.guard';
+
+
 
 @Module({
     imports: [
@@ -45,6 +48,7 @@ import { AuthModule } from './auth/auth.module';
     controllers: [AppController],
     providers: [
         AppService,
+        AuthGuard,
         {
             provide: APP_PIPE,
             useValue: new ValidationPipe({
