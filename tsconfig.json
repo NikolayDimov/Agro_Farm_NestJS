@@ -17,5 +17,8 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
+  },
+  "typeOrm": {
+    "config": "db/data-source.js" // Adjust the path based on your project structure
   }
 }

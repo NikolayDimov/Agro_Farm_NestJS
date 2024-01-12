@@ -15,6 +15,9 @@ import { AuthGuard } from './auth/auth.guard';
 import { FieldModule } from './field/field.module';
 import { Field } from './field/field.entity';
 
+import { DataSourceOptions } from 'typeorm';
+import typeOrmConfig from '../db/data-source';
+
 
 
 @Module({
@@ -26,6 +29,7 @@ import { Field } from './field/field.entity';
         TypeOrmModule.forRootAsync({
             inject: [ConfigService],
             useFactory: (config: ConfigService) => {
+                // return typeOrmConfig
                 return {
                     type: 'postgres',
                     host: 'localhost',

@@ -1,37 +1,21 @@
-import { Expose, Transform } from 'class-transformer';
-import { User } from '../../users/user.entity';
+import { Expose, Type } from "class-transformer";
+import { CountryDto } from '../../country/dtos/country.dto'
+import { FieldDto } from '../../field//dtos/field-dto';
 
-export class ReportDto {
+export class FarmDto {
     @Expose()
-    id: number;
-
-    @Expose()
-    price: number;
+    id: string;
 
     @Expose()
-    year: number;
+    name: string;
 
     @Expose()
-    lng: number;
+    @Type(() => CountryDto)
+    country: CountryDto;
 
     @Expose()
-    lat: number;
-
-    @Expose()
-    make: string;
-
-    @Expose()
-    model: string;
-
-    @Expose()
-    mileage: number;
-
-    @Expose()
-    approved: boolean;
-
-    @Transform(({ obj }) => obj.user.id)
-    @Expose()
-    userId: number;
+    @Type(() => FieldDto)
+    fields: FieldDto[];
 }
 
 // The @Expose() decorator is used to mark class properties that should be exposed during the transformation process. When transforming an object using class-transformer, only the properties marked with @Expose() will be included in the transformation result. This allows you to control which properties are included or excluded during the transformation.

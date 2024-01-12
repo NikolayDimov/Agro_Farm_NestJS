@@ -1,5 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from "typeorm";
-import { User } from "../users/user.entity";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, JoinColumn } from "typeorm";
 import { Country } from "../country/country.entity";
 import { Field } from "../field/field.entity";
 
@@ -24,8 +23,9 @@ export class Farm {
     // user: User;
 
     @ManyToOne(() => Country, (country) => country.farms)
+    @JoinColumn({ name: 'countryId' })
     country: Country;
 
     @OneToMany(() => Field, (field) => field.farm)
-    fields: Field;
+    fields: Field[];
 }

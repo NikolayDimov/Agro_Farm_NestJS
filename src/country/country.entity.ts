@@ -19,5 +19,5 @@ export class Country {
     deleted: Date;
 
     @OneToMany(() => Farm, (farm) => farm.country)
-    farms: Farm;
+    farms: Farm[];
 }
