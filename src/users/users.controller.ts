@@ -12,11 +12,10 @@ import {
     Res, 
     HttpStatus
 } from "@nestjs/common";
-import { CreateUserDto } from "./dtos/create-user.dto";
-import { UpdateuserDto } from "./dtos/update-user.dto";
+import { CreateUserDto } from "../auth/dtos/create-user.dto";
 import { UsersService } from "./users.service";
 import { Serialize } from "../interceptors/serialize.interceptor";
-import { UserDto } from "./dtos/user.dto";
+import { UserDto } from "../auth/dtos/user.dto";
 import { AuthService } from "../auth/auth.service";
 import { CurrentUser } from "./decorators/current-user.decorators";
 import { User } from "./user.entity";

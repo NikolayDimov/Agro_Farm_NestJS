@@ -9,20 +9,19 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     DeleteDateColumn,
+    BeforeInsert,
 } from "typeorm";
 import { UserRole } from "../auth/dtos/enum";
 
-
-
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryGeneratedColumn("uuid")
     id: number;
 
     @Column()
     username: string;
 
-    @Column({unique: true})
+    @Column({ unique: true })
     email: string;
 
     @Column()
@@ -30,6 +29,10 @@ export class User {
 
     @Column({ type: "enum", enum: UserRole, default: UserRole.VIEWER, enumName: "user_role" })
     role: UserRole;
+
+    // @Column({ default: UserRole.VIEWER })
+    // role: UserRole;
+
 
     @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
     created: Date;
@@ -58,4 +61,12 @@ export class User {
     logRemove() {
         console.log("Removed User with id", this.id);
     }
+
+    // @BeforeInsert()
+    // setDefaultRole() {
+    //     // Set the default role to VIEWER if not provided during user creation
+    //     if (!this.role) {
+    //         this.role = UserRole.VIEWER;
+    //     }
+    // }
 }

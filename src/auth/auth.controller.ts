@@ -5,8 +5,9 @@ import { AuthGuard } from "./auth.guard";
 import { CreateUserDto } from "./dtos/create-user.dto";
 import { Serialize } from "../interceptors/serialize.interceptor";
 import { SignInDto } from "./dtos/signIn.dto";
+import {UserRole} from '../auth/dtos/enum';
 
-@Controller("auth")
+@Controller('auth')
 // @Serialize(UserDto)  -> not log the uset in
 export class AuthController {
     constructor(private authService: AuthService) {}
@@ -17,7 +18,7 @@ export class AuthController {
         return this.authService.signIn(signInDto);
     }
 
-    @Post("/register")
+    @Post('/register')
     async createUser(@Body() user: CreateUserDto) {
         const userCreate = await this.authService.signUp(user); // creating User with authentication
         return userCreate;

@@ -10,6 +10,8 @@ import { mapCreateFarmDtoToFarm } from './mapper';
 import { Country } from '../country/country.entity';
 import { DeepPartial } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
+import { FindOneOptions, Like } from 'typeorm';
+
 
 
 @Injectable()
@@ -17,8 +19,6 @@ export class FarmService {
     constructor(@InjectRepository(Farm) private farmRepository: Repository<Farm>,
     @InjectRepository(Country) private readonly countryRepository: Repository<Country>,
     ) {}
-
-    
 
     // Work with 
     // {
@@ -65,37 +65,15 @@ export class FarmService {
     
         return this.farmRepository.save(newFarm);
       }
-      
-
-    // async findAll(): Promise<Farm[]> {
-    //     // Use the farmRepository to fetch all farms
-    //     const farms = await this.farmRepository.find();
-
-    //     if (!farms.length) {
-    //         throw new NotFoundException("No farms found");
-    //     }
-
-    //     return farms;
-    // }
-
-    // async findAll(): Promise<Farm[]> {
-    //     // Use the farmRepository to fetch all farms with the associated country
-    //     const farms = await this.farmRepository.find({ relations: ['country'] });
     
-    //     if (!farms.length) {
-    //       throw new NotFoundException("No farms found");
-    //     }
-    
-    //     return farms;
-    //   }
 
 
     async findAll(): Promise<Farm[]> {
         try {
           const farms = await this.farmRepository
             .createQueryBuilder('farm')
-            .leftJoinAndSelect('farm.country', 'country') // Ensure proper join with country
-            .andWhere('farm.deleted IS NULL') // Add a condition for non-deleted farms
+            .leftJoinAndSelect('farm.country', 'country') 
+            .andWhere('farm.deleted IS NULL') 
             .getMany();
     
           if (!farms.length) {
@@ -107,32 +85,18 @@ export class FarmService {
           return farms;
         } catch (error) {
           console.error('Error fetching farms:', error);
-          throw error; // Rethrow the error for further debugging
+          throw error; 
         }
       }
       
 
-    // async findById(id: string): Promise<Farm> {
-    //     // Use the farmRepository to find a farm by its ID
-    //     const farm = await this.farmRepository.findOne({ where: { id: Number(id) } });
-
-    //     if (!farm) {
-    //         throw new NotFoundException(`Farm with id ${id} not found`);
-    //     }
-
-    //     return farm;
-    // }
-
-    // farm.service.ts
-
     async findById(id: string): Promise<Farm> {
         try {
-          // Use the farmRepository to find a farm by its ID with the associated country
           const farm = await this.farmRepository
             .createQueryBuilder('farm')
-            .leftJoinAndSelect('farm.country', 'country') // Ensure proper join with country
+            .leftJoinAndSelect('farm.country', 'country') 
             .andWhere('farm.id = :id', { id })
-            .andWhere('farm.deleted IS NULL') // Add a condition for non-deleted farms
+            .andWhere('farm.deleted IS NULL') 
             .getOne();
     
           if (!farm) {
@@ -142,7 +106,21 @@ export class FarmService {
           return farm;
         } catch (error) {
           console.error('Error fetching farm by ID:', error);
-          throw error; // Rethrow the error for further debugging
+          throw error; 
+        }
+      }
+
+
+      async deleteFarmById(id: string): Promise<void> {
+        try {
+          // findOneOrFail expects an object with a "where" property
+          const farm = await this.farmRepository.findOneOrFail({ where: { id } });
+    
+          // Soft delete by setting the "deleted" property
+          farm.deleted = new Date();
+          await this.farmRepository.save(farm);
+        } catch (error) {
+          throw new NotFoundException(`Farm with id ${id} not found`);
         }
       }
       

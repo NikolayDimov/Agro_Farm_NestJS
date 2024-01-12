@@ -5,7 +5,7 @@ import { Field } from "../field/field.entity";
 @Entity()
 export class Farm {
     @PrimaryGeneratedColumn("uuid")
-    id: number;
+    id: string;
 
     @Column()
     name: string;

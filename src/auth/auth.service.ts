@@ -7,6 +7,7 @@ import { CreateUserDto } from "./dtos/create-user.dto";
 const scrypt = promisify(_scrypt);
 
 import { SignInDto } from "./dtos/signIn.dto";
+import { UserRole } from "../auth/dtos/enum";
 
 @Injectable()
 export class AuthService {
@@ -16,13 +17,16 @@ export class AuthService {
     ) {}
 
     async signUp(user: CreateUserDto) {
-        // See if email is in use
         const users = await this.usersService.find(user.username);
+       
         if (users.length) {
             throw new BadRequestException("username-name in use");
         }
 
         try {
+            // Set the default role to VIEWER if not provided  ---// NO NEED
+            // user.role = user.role || UserRole.VIEWER;
+         
             // Hash the users password
             // - Generate the salt
             const salt = randomBytes(8).toString("hex");
@@ -31,16 +35,11 @@ export class AuthService {
             // - Join the hashed result and the salt together
             const resultHashPass = salt + "." + hash.toString("hex");
             // Create a new user and save it
-            const userToCreate = await this.usersService.create(
-                user.username,
-                user.email,
-                resultHashPass,
-                user.role 
-            );
-            
+            const userToCreate = await this.usersService.create(user.username, user.email, resultHashPass, user.role);
+
             return userToCreate;
         } catch (error) {
-            throw new BadRequestException("Error creating user");
+            throw new BadRequestException("Email is already use!");
         }
     }
 
@@ -67,11 +66,7 @@ export class AuthService {
                 access_token: await this.jwtService.signAsync(payload),
             };
         } catch (error) {
-            // Handle cryptographic errors here
-            throw new BadRequestException("Error creating user");
+            throw new BadRequestException("Error user login");
         }
     }
-
-
-    
 }

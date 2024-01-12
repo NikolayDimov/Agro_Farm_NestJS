@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Patch, Param, Get, Query, UsePipes, NotFoundException, BadRequestException } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards, Patch, Param, Get, Delete, Query, UsePipes, NotFoundException, BadRequestException } from "@nestjs/common";
 import { CreateFarmDto } from "./dtos/create-farm.dto";
 import { FarmService } from "./farm.service";
 import { AuthGuard } from "../guards/auth.guard";
@@ -62,7 +62,6 @@ export class FarmController {
       try {
         const farm = await this.farmService.findById(id);
   
-        // Manually transform the data before returning
         const transformedFarm = {
           id: farm.id,
           name: farm.name,
@@ -76,7 +75,7 @@ export class FarmController {
             updated: farm.country.updated,
             deleted: farm.country.deleted,
           },
-          fields: [], // Set it to an empty array or provide appropriate data
+          fields: [], 
         };
   
         return { data: transformedFarm };
@@ -84,5 +83,11 @@ export class FarmController {
         console.error('Error fetching farm by ID:', error);
         throw new NotFoundException('Farm not found');
       }
+    }
+
+
+    @Delete(':id')
+    async deleteFarmById(@Param('id') id: string): Promise<void> {
+      await this.farmService.deleteFarmById(id);
     }
 }
