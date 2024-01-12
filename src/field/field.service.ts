@@ -40,4 +40,53 @@ export class FieldService {
       throw error;
     }
   }
+
+  async getAllFieldsWithDetails(): Promise<Field[]> {
+    return this.fieldRepository
+      .createQueryBuilder("field")
+      .leftJoinAndSelect("field.soil", "soil")
+      .leftJoinAndSelect("field.farm", "farm")
+      .select([
+        "field.id",
+        "field.name",
+        "field.created",
+        "field.updated",
+        "field.deleted",
+        "soil.name",
+        "farm.name",
+      ])
+      .getMany();
+  }
+
+  async findById(id: string): Promise<Field> {
+    try {
+      const field = await this.fieldRepository
+        .createQueryBuilder("field")
+        .andWhere("field.id = :id", { id })
+        .andWhere("field.deleted IS NULL")
+        .getOne();
+
+      if (!field) {
+        throw new NotFoundException(`Farm with ID ${id} not found`);
+      }
+
+      return field;
+    } catch (error) {
+      console.error("Error fetching farm by ID:", error);
+      throw error;
+    }
+  }
+
+  async deleteFieldById(id: string): Promise<void> {
+    try {
+      // findOneOrFail expects an object with a "where" property
+      const farm = await this.fieldRepository.findOneOrFail({ where: { id } });
+
+      // Soft delete by setting the "deleted" property
+      farm.deleted = new Date();
+      await this.fieldRepository.save(farm);
+    } catch (error) {
+      throw new NotFoundException(`Farm with id ${id} not found`);
+    }
+  }
 }

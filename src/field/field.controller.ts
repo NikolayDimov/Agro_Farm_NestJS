@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, NotFoundException } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  NotFoundException,
+  Param,
+  Delete,
+} from "@nestjs/common";
 import { FieldService } from "./field.service";
 import { CreateFieldDto } from "./dtos/create-field.dto";
 
@@ -36,5 +44,36 @@ export class FieldController {
 
       return { error: "An error occurred while fetching fields" };
     }
+  }
+
+  @Get("getAllFieldsDetails")
+  async getAllFieldsWithDetails() {
+    try {
+      const fields = await this.fieldService.getAllFieldsWithDetails();
+      return { data: fields };
+    } catch (error) {
+      console.error("Error fetching fields with details:", error);
+      return { error: "An error occurred while fetching fields with details" };
+    }
+  }
+
+  @Get(":id")
+  async getFieldById(@Param("id") id: string) {
+    try {
+      const field = await this.fieldService.findById(id);
+      return { data: field };
+    } catch (error) {
+      console.error("Error fetching field by ID:", error);
+
+      if (error instanceof NotFoundException) {
+        return { error: "Field not found" };
+      }
+
+      return { error: "An error occurred while fetching field by ID" };
+    }
+  }
+  @Delete(":id")
+  async deleteFieldById(@Param("id") id: string): Promise<void> {
+    await this.fieldService.deleteFieldById(id);
   }
 }
