@@ -17,14 +17,13 @@ export class Country {
   @Column()
   name: string;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  // @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  // created: Date;
+
+  @CreateDateColumn({ type: "timestamp", name: "created_at" })
   created: Date;
 
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
+  @UpdateDateColumn({ type: "timestamp", onUpdate: "CURRENT_TIMESTAMP" })
   updated: Date;
 
   @DeleteDateColumn({ type: "timestamp", nullable: true })

@@ -12,7 +12,7 @@ import { Field } from "../field/field.entity";
 @Entity()
 export class Soil {
   @PrimaryGeneratedColumn("uuid")
-  id: number;
+  id: string;
 
   @Column()
   name: string;

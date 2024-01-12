@@ -22,14 +22,10 @@ export class Field {
   @Column()
   polygons: string;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  @CreateDateColumn({ type: "timestamp" })
   created: Date;
 
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
+  @UpdateDateColumn({ type: "timestamp", onUpdate: "CURRENT_TIMESTAMP" })
   updated: Date;
 
   @DeleteDateColumn({ type: "timestamp", nullable: true })
@@ -38,11 +34,11 @@ export class Field {
   // @ManyToOne(() => User, (user) => user.farms)
   // user: User;
 
-  @ManyToOne(() => Farm, (farm) => farm.fields)
+  @ManyToOne(() => Farm, (farm) => farm.id)
   @JoinColumn({ name: "farm_id" })
   farm: Farm;
 
-  @ManyToOne(() => Soil, (soil) => soil.fields)
+  @ManyToOne(() => Soil, (soil) => soil.id)
   @JoinColumn({ name: "soil_id" })
   soil: Field;
 }

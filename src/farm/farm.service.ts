@@ -13,34 +13,6 @@ export class FarmService {
     private readonly countryRepository: Repository<Country>,
   ) {}
 
-  // Work with
-  // {
-  //     "name": "Farm Varna",
-  //     "countryId": "a793df9e-660f-450c-ad09-7698d3703b73"
-  //   }
-
-  // async createFarm(createFarmDto: CreateFarmDto): Promise<Farm> {
-  //     const { name, countryId } = createFarmDto;
-
-  //     const isValidCountry = await this.validateCountryExistence(countryId);
-
-  //     if (!isValidCountry) {
-  //       throw new Error('Invalid countryId. Country does not exist.');
-  //     }
-
-  //     const newFarm = this.farmRepository.create({
-  //       name,
-  //       country: { id: countryId as unknown as number } as Country, // Explicit cast to handle the type discrepancy
-  //     });
-
-  //     return this.farmRepository.save(newFarm);
-  //   }
-
-  //   private async validateCountryExistence(countryId: string): Promise<boolean> {
-  //     const country = await this.countryRepository.findOne({ where: { id: countryId as any } });
-  //     return !!country;
-  //   }
-
   async createFarm(createFarmDto: CreateFarmDto): Promise<Farm> {
     const { name, countryName } = createFarmDto;
 

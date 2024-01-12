@@ -20,14 +20,10 @@ export class Farm {
   @Column()
   name: string;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  @CreateDateColumn({ type: "timestamp" })
   created: Date;
 
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
+  @UpdateDateColumn({ type: "timestamp", onUpdate: "CURRENT_TIMESTAMP" })
   updated: Date;
 
   @DeleteDateColumn({ type: "timestamp", nullable: true })
@@ -36,7 +32,7 @@ export class Farm {
   // @ManyToOne(() => User, (user) => user.farms)
   // user: User;
 
-  @ManyToOne(() => Country, (country) => country.farms)
+  @ManyToOne(() => Country, (country) => country.id)
   @JoinColumn({ name: "country_id" })
   country: Country;
 
