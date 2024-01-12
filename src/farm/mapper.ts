@@ -1,9 +1,12 @@
-import { CreateFarmDto } from './dtos/create-farm.dto';
-import { Farm } from './farm.entity';
-import { Country } from '../country/country.entity';
-import { uuid } from 'uuid';
+import { CreateFarmDto } from "./dtos/create-farm.dto";
+import { Farm } from "./farm.entity";
+import { Country } from "../country/country.entity";
+import { uuid } from "uuid";
 
-export function mapCreateFarmDtoToFarm(createFarmDto: CreateFarmDto, country: Country): Farm {
+export function mapCreateFarmDtoToFarm(
+  createFarmDto: CreateFarmDto,
+  country: Country,
+): Farm {
   const id = uuid.v4(); // Generate a unique ID for the farm
 
   return {
