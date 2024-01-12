@@ -11,7 +11,7 @@ import {
 } from "typeorm";
 import { UserRole } from "../auth/dtos/enum";
 
-@Entity()
+@Entity({ name: "user", schema: "public" })
 export class User {
   @PrimaryGeneratedColumn("uuid")
   id: number;
@@ -33,15 +33,6 @@ export class User {
   })
   role: UserRole;
 
-  @CreateDateColumn({ type: "timestamp" })
-  created: Date;
-
-  @UpdateDateColumn({ type: "timestamp", onUpdate: "CURRENT_TIMESTAMP" })
-  updated: Date;
-
-  @DeleteDateColumn({ type: "timestamp", nullable: true })
-  deleted: Date;
-
   // Not connect user and farm
   // @OneToMany(() => Farm, (farm) => farm.user)
   // farms: Farm[];
@@ -60,4 +51,13 @@ export class User {
   logRemove() {
     console.log("Removed User with id", this.id);
   }
+
+  @CreateDateColumn({ type: "timestamp" })
+  created: Date;
+
+  @UpdateDateColumn({ type: "timestamp", onUpdate: "CURRENT_TIMESTAMP" })
+  updated: Date;
+
+  @DeleteDateColumn({ type: "timestamp", nullable: true })
+  deleted: Date;
 }

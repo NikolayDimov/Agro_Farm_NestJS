@@ -13,6 +13,8 @@ export const dataSourceOptions: DataSourceOptions = {
   entities: ["dist/**/*.entity.js"],
   migrations: ["dist/db/migrations/*.js"],
   synchronize: false,
+  // logging: true,
+  // schema: "public",
 };
 
 const dataSource = new DataSource(dataSourceOptions);

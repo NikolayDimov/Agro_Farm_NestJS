@@ -1,24 +1,27 @@
 import {
   Entity,
-  Column,
   PrimaryGeneratedColumn,
-  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from "typeorm";
-import { Farm } from "../farm/farm.entity";
+import { Crop } from "../crop/crop.entity";
+import { Field } from "../field/field.entity";
 
-@Entity({ name: "country", schema: "public" })
-export class Country {
+@Entity()
+export class GrowingPeriod {
   @PrimaryGeneratedColumn("uuid")
-  id: number;
+  id: string;
 
-  @Column()
-  name: string;
+  @ManyToOne(() => Field, (field) => field.growingPeriods)
+  @JoinColumn({ name: "field_id" })
+  field: Field;
 
-  @OneToMany(() => Farm, (farm) => farm.country)
-  farms: Farm[];
+  @ManyToOne(() => Crop, (crop) => crop.growingPeriods)
+  @JoinColumn({ name: "crop_id" })
+  crop: Crop;
 
   @CreateDateColumn({ type: "timestamp", name: "created_at" })
   created: Date;

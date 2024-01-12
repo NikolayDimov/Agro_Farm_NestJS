@@ -1,24 +1,24 @@
 import {
   Entity,
-  Column,
   PrimaryGeneratedColumn,
-  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  Column,
+  OneToMany,
 } from "typeorm";
-import { Farm } from "../farm/farm.entity";
+import { Cultivation } from "src/cultivation/cultivation.entity";
 
-@Entity({ name: "country", schema: "public" })
-export class Country {
+@Entity()
+export class CultivationType {
   @PrimaryGeneratedColumn("uuid")
-  id: number;
+  id: string;
 
   @Column()
   name: string;
 
-  @OneToMany(() => Farm, (farm) => farm.country)
-  farms: Farm[];
+  @OneToMany(() => Cultivation, (cultivation) => cultivation.cultivationType)
+  cultivations: Cultivation[];
 
   @CreateDateColumn({ type: "timestamp", name: "created_at" })
   created: Date;

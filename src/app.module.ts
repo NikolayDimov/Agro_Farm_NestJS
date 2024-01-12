@@ -14,6 +14,10 @@ import { FieldModule } from "./field/field.module";
 import { dataSourceOptions } from "../db/data-source";
 import { SoilModule } from "./soil/soil.module";
 import { CultivationModule } from "./cultivation/cultivation.module";
+import { CultivationTypeModule } from "./cultivation-type/cultivation-type.module";
+import { GrowingPeriodModule } from "./growing-period/growing-period.module";
+import { MachineModule } from "./machine/machine.module";
+import { CropModule } from "./crop/crop.module";
 
 @Module({
   imports: [
@@ -46,6 +50,10 @@ import { CultivationModule } from "./cultivation/cultivation.module";
     FieldModule,
     SoilModule,
     CultivationModule,
+    CultivationTypeModule,
+    GrowingPeriodModule,
+    MachineModule,
+    CropModule,
   ],
   controllers: [AppController],
   providers: [

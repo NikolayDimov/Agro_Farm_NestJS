@@ -17,15 +17,19 @@ export class Soil {
   @Column()
   name: string;
 
-  @CreateDateColumn({ type: "timestamp" })
-  created: Date;
-
-  @UpdateDateColumn({ type: "timestamp", onUpdate: "CURRENT_TIMESTAMP" })
-  updated: Date;
-
-  @DeleteDateColumn({ type: "timestamp", nullable: true })
-  deleted: Date;
-
   @OneToMany(() => Field, (field) => field.soil)
   fields: Field[];
+
+  @CreateDateColumn({ type: "timestamp", name: "created_at" })
+  created: Date;
+
+  @UpdateDateColumn({
+    type: "timestamp",
+    onUpdate: "CURRENT_TIMESTAMP",
+    name: "updated_at",
+  })
+  updated: Date;
+
+  @DeleteDateColumn({ type: "timestamp", name: "deleted_at", nullable: true })
+  deleted: Date;
 }

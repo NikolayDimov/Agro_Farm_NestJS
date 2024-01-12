@@ -4,7 +4,7 @@ import { Controller, Post, Body } from "@nestjs/common";
 import { CountryService } from "./country.service";
 import { CreateCountryDto } from "./dtos/create-country.dto";
 
-@Controller("countries")
+@Controller("country")
 export class CountryController {
   constructor(private readonly countryService: CountryService) {}
 

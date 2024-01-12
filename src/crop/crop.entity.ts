@@ -2,23 +2,23 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from "typeorm";
-import { Farm } from "../farm/farm.entity";
+import { GrowingPeriod } from "../growing-period/growing-period.entity";
 
-@Entity({ name: "country", schema: "public" })
-export class Country {
+@Entity()
+export class Crop {
   @PrimaryGeneratedColumn("uuid")
-  id: number;
+  id: string;
 
   @Column()
   name: string;
 
-  @OneToMany(() => Farm, (farm) => farm.country)
-  farms: Farm[];
+  @OneToMany(() => GrowingPeriod, (growingPeriod) => growingPeriod.crop)
+  growingPeriods: GrowingPeriod[];
 
   @CreateDateColumn({ type: "timestamp", name: "created_at" })
   created: Date;
