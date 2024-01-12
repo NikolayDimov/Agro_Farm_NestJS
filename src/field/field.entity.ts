@@ -32,6 +32,7 @@ export class Field {
   @DeleteDateColumn({ type: "timestamp", nullable: true })
   deleted: Date;
 
+  // Connect to the user - not for our project
   // @ManyToOne(() => User, (user) => user.farms)
   // user: User;
 

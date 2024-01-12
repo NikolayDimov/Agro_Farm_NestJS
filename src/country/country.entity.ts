@@ -17,16 +17,17 @@ export class Country {
   @Column()
   name: string;
 
-  // @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  // created: Date;
-
   @CreateDateColumn({ type: "timestamp", name: "created_at" })
   created: Date;
 
-  @UpdateDateColumn({ type: "timestamp", onUpdate: "CURRENT_TIMESTAMP" })
+  @UpdateDateColumn({
+    type: "timestamp",
+    onUpdate: "CURRENT_TIMESTAMP",
+    name: "updated_at",
+  })
   updated: Date;
 
-  @DeleteDateColumn({ type: "timestamp", nullable: true })
+  @DeleteDateColumn({ type: "timestamp", name: "deleted_at", nullable: true })
   deleted: Date;
 
   @OneToMany(() => Farm, (farm) => farm.country)
