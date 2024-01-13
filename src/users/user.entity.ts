@@ -52,12 +52,16 @@ export class User {
     console.log("Removed User with id", this.id);
   }
 
-  @CreateDateColumn({ type: "timestamp" })
+  @CreateDateColumn({ type: "timestamp", name: "created_at" })
   created: Date;
 
-  @UpdateDateColumn({ type: "timestamp", onUpdate: "CURRENT_TIMESTAMP" })
+  @UpdateDateColumn({
+    type: "timestamp",
+    onUpdate: "CURRENT_TIMESTAMP",
+    name: "updated_at",
+  })
   updated: Date;
 
-  @DeleteDateColumn({ type: "timestamp", nullable: true })
+  @DeleteDateColumn({ type: "timestamp", name: "deleted_at", nullable: true })
   deleted: Date;
 }

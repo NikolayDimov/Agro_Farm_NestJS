@@ -81,3 +81,5 @@ export class SoilController {
     }
   }
 }
+
+// When you use return with a promise inside an asynchronous function, the function automatically returns a promise that will be resolved with the value returned from the asynchronous operation. Here's the corrected explanation:
