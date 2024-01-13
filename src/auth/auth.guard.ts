@@ -35,6 +35,7 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
+  // By Documentation
   // private extractTokenFromHeader(request: Request): string | undefined {
   //     const [type, token] = request.headers.authorization?.split(" ") ?? [];
   //     console.log("Authorization Type:", type);
@@ -44,7 +45,7 @@ export class AuthGuard implements CanActivate {
 
   private extractTokenFromHeader(request: Request): string | undefined {
     const authHeader = request.headers.authorization;
-    console.log("Authorization Header:", authHeader);
+    // console.log("Authorization Header:", authHeader);
 
     if (authHeader && typeof authHeader === "string") {
       const [type, token] = authHeader.split(" ");

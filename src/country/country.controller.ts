@@ -1,10 +1,10 @@
-// country.controller.ts
-
-import { Controller, Post, Body } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards } from "@nestjs/common";
+import { AuthGuard } from "../auth/auth.guard";
 import { CountryService } from "./country.service";
 import { CreateCountryDto } from "./dtos/create-country.dto";
 
 @Controller("country")
+@UseGuards(AuthGuard)
 export class CountryController {
   constructor(private readonly countryService: CountryService) {}
 

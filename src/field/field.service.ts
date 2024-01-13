@@ -81,7 +81,6 @@ export class FieldService {
     try {
       // findOneOrFail expects an object with a "where" property
       const farm = await this.fieldRepository.findOneOrFail({ where: { id } });
-
       // Soft delete by setting the "deleted" property
       farm.deleted = new Date();
       await this.fieldRepository.save(farm);

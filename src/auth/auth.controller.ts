@@ -14,7 +14,7 @@ import { CreateUserDto } from "./dtos/create-user.dto";
 import { SignInDto } from "./dtos/signIn.dto";
 
 @Controller("auth")
-// @Serialize(UserDto)  -> not log the uset in
+// @Serialize(UserDto)  -> not used
 export class AuthController {
   constructor(private authService: AuthService) {}
 
@@ -30,25 +30,45 @@ export class AuthController {
     return userCreate;
   }
 
-  // @Post("signout")
-  // logout(@Res() res: Response) {
-  //     // Clear JWT token on the client side
-  //     res.clearCookie("jwt_token"); // Example for clearing a cookie
-
-  //     // Return a successful response
-  //     return res.status(HttpStatus.OK).json({ message: "Logout successful" });
-  // }
-
-  @Post("signout")
-  logout() {
-    // Simply return a successful response without clearing cookies
-    // Client (front end) is responsible for handling the removal of the JWT token.
-    return { message: "Logout successful" };
-  }
-
   @UseGuards(AuthGuard)
   @Get("/profile")
   getProfile(@Request() req) {
     return req.user;
   }
+
+  // LOGOUT NOT WORK IN BACK-END
+  // @UseGuards(AuthGuard)
+  // @Post("logout")
+  // logout(@Res() res: Response): void {
+  //   const cookieName = "your_custom_cookie_name"; // Replace with your custom cookie name
+
+  //   // Clear the custom cookie on the server side (assuming you're using cookies)
+  //   res.clearCookie(cookieName);
+
+  //   // Send a response indicating a successful logout
+  //   res.status(HttpStatus.OK).json({ message: "Logout successful" });
+  // }
 }
+
+// FOR FRONT-END
+// auth.service.ts (Angular example)
+// import { Injectable } from "@angular/core";
+
+// @Injectable({
+//   providedIn: "root",
+// })
+// export class AuthService {
+//   private token: string | null = null;
+
+//   login(token: string): void {
+//     this.token = token;
+//   }
+
+//   logout(): void {
+//     this.token = null;
+//   }
+
+//   getToken(): string | null {
+//     return this.token;
+//   }
+// }
