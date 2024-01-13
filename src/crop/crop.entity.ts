@@ -14,7 +14,7 @@ export class Crop {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  @Column({ nullable: false })
   name: string;
 
   @OneToMany(() => GrowingPeriod, (growingPeriod) => growingPeriod.crop)

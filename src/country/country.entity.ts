@@ -14,7 +14,7 @@ export class Country {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  @Column({ nullable: false })
   name: string;
 
   @OneToMany(() => Farm, (farm) => farm.country)

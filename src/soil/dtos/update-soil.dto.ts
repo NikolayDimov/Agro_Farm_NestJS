@@ -1,7 +1,7 @@
 import { Expose } from "class-transformer";
 import { IsString, IsNotEmpty, Matches } from "class-validator";
 
-export class UpdateCropDto {
+export class UpdateSoilDto {
   @Expose()
   @IsString()
   @IsNotEmpty({ message: "Name cannot be empty" })

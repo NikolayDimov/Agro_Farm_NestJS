@@ -1,7 +1,7 @@
 import { Expose } from "class-transformer";
 import { IsUUID, IsString } from "class-validator";
 
-export class CropDto {
+export class SoilDto {
   @Expose()
   @IsUUID()
   id: string;

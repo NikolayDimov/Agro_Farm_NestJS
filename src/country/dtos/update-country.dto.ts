@@ -1,9 +1,13 @@
 import { Expose } from "class-transformer";
-import { IsString, IsOptional } from "class-validator";
+import { IsString, IsNotEmpty, Matches } from "class-validator";
 
 export class UpdateCountryDto {
   @Expose()
-  @IsOptional()
   @IsString()
-  name?: string;
+  @IsNotEmpty({ message: "Name cannot be empty" })
+  @IsString({ message: "Name must be a string" })
+  @Matches(/^[A-Za-z0-9]+$/, {
+    message: "Name must contain only letters and numbers",
+  })
+  name: string;
 }

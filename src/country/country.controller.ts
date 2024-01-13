@@ -7,6 +7,7 @@ import {
   Delete,
   Body,
   Param,
+  NotFoundException,
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { CountryService } from "./country.service";
@@ -20,17 +21,32 @@ export class CountryController {
 
   @Post("/createCountry")
   async createCountry(@Body() createCountryDto: CreateCountryDto) {
-    return this.countryService.createCountry(createCountryDto);
+    try {
+      return this.countryService.createCountry(createCountryDto);
+    } catch (error) {
+      console.error("Error creating country:", error);
+      throw new NotFoundException("Failed to create country");
+    }
   }
 
   @Get("getAllCountries")
   async getAllCountries() {
-    return this.countryService.findAll();
+    try {
+      return this.countryService.findAll();
+    } catch (error) {
+      console.error("Error fetching all countries:", error);
+      throw new NotFoundException("Failed to fetch countries");
+    }
   }
 
   @Get(":id")
   async getCountryById(@Param("id") id: string) {
-    return this.countryService.findById(id);
+    try {
+      return this.countryService.findById(id);
+    } catch (error) {
+      console.error("Error fetching country by ID:", error);
+      throw new NotFoundException("Country not found");
+    }
   }
 
   @Patch(":id")
@@ -38,13 +54,23 @@ export class CountryController {
     @Param("id") id: string,
     @Body() updateCountryDto: UpdateCountryDto,
   ) {
-    return this.countryService.updateCountry(id, updateCountryDto);
+    try {
+      return this.countryService.updateCountry(id, updateCountryDto);
+    } catch (error) {
+      console.error("Error updating country:", error);
+      throw new NotFoundException("Failed to update country");
+    }
   }
 
   @Delete(":id")
   async deleteCountryById(
     @Param("id") id: string,
   ): Promise<{ id: string; name: string; message: string }> {
-    return this.countryService.deleteCountryById(id);
+    try {
+      return this.countryService.deleteCountryById(id);
+    } catch (error) {
+      console.error("Error deleting country:", error);
+      throw new NotFoundException("Failed to delete country");
+    }
   }
 }

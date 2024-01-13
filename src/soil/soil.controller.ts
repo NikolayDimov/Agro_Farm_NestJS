@@ -1,28 +1,43 @@
 import {
   Controller,
+  UseGuards,
   Post,
   Get,
+  Patch,
   Delete,
   Body,
   Param,
   NotFoundException,
 } from "@nestjs/common";
+import { AuthGuard } from "../auth/auth.guard";
 import { CreateSoilDto } from "./dtos/create-soil.dto";
 import { SoilService } from "./soil.service";
+import { UpdateSoilDto } from "./dtos/update-soil.dto";
 
 @Controller("soil")
+@UseGuards(AuthGuard)
 export class SoilController {
   constructor(private soilService: SoilService) {}
 
   @Post("/createSoil")
-  async createFarm(@Body() createSoilDto: CreateSoilDto) {
-    return this.soilService.createSoil(createSoilDto);
+  async createSoil(@Body() createSoilDto: CreateSoilDto) {
+    try {
+      return this.soilService.createSoil(createSoilDto);
+    } catch (error) {
+      console.error("Error creating soil:", error);
+      throw new NotFoundException("Failed to create soil");
+    }
   }
 
   @Get("getAll")
   async getAllSoils() {
-    const soils = await this.soilService.findAll();
-    return { data: soils };
+    try {
+      const soils = await this.soilService.findAll();
+      return { data: soils };
+    } catch (error) {
+      console.error("Error fetching all soils:", error);
+      throw new NotFoundException("Failed to fetch soils");
+    }
   }
 
   @Get(":id")
@@ -41,8 +56,28 @@ export class SoilController {
     }
   }
 
+  @Patch(":id")
+  async updateSoil(
+    @Param("id") id: string,
+    @Body() updateSoilDto: UpdateSoilDto,
+  ) {
+    try {
+      return this.soilService.updateSoil(id, updateSoilDto);
+    } catch (error) {
+      console.error("Error updating soil:", error);
+      throw new NotFoundException("Failed to update soil");
+    }
+  }
+
   @Delete(":id")
-  async deleteSoilById(@Param("id") id: string): Promise<void> {
-    await this.soilService.deleteSoilById(id);
+  async deleteSoilById(
+    @Param("id") id: string,
+  ): Promise<{ id: string; name: string; message: string }> {
+    try {
+      return this.soilService.deleteSoilById(id);
+    } catch (error) {
+      console.error("Error deleting soil:", error);
+      throw new NotFoundException("Failed to delete soil");
+    }
   }
 }

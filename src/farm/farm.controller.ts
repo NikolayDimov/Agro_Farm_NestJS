@@ -9,7 +9,6 @@ import {
 } from "@nestjs/common";
 import { CreateFarmDto } from "./dtos/create-farm.dto";
 import { FarmService } from "./farm.service";
-
 import { CountryService } from "../country/country.service";
 
 @Controller("farm")
@@ -29,7 +28,6 @@ export class FarmController {
     try {
       const farms = await this.farmService.findAll();
 
-      // Simplified transformation
       const transformedFarms = farms.map((farm) => ({
         id: farm.id,
         name: farm.name,

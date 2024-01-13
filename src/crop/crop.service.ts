@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { validate } from "class-validator";
 import { Crop } from "./crop.entity";
 import { CreateCropDto } from "./dtos/create-crop.dto";
 import { UpdateCropDto } from "./dtos/update-crop.dto";
@@ -12,11 +17,21 @@ export class CropService {
   ) {}
 
   async createCrop(createCropDto: CreateCropDto): Promise<Crop> {
-    const { name } = createCropDto;
+    const errors = await validate(createCropDto);
 
-    const newCrop = this.cropRepository.create({ name });
-    return this.cropRepository.save(newCrop);
+    if (errors.length > 0) {
+      throw new BadRequestException(errors);
+    }
+
+    try {
+      const { name } = createCropDto;
+      const newCrop = this.cropRepository.create({ name });
+      return await this.cropRepository.save(newCrop);
+    } catch (error) {
+      throw new BadRequestException("Error creating crop: " + error.message);
+    }
   }
+
   async findAll(): Promise<Crop[]> {
     try {
       const crop = await this.cropRepository
@@ -62,13 +77,18 @@ export class CropService {
   }
 
   async updateCrop(id: string, updateCropDto: UpdateCropDto): Promise<Crop> {
-    const crop = await this.findById(id);
+    try {
+      const crop = await this.findById(id);
 
-    if (updateCropDto.name) {
-      crop.name = updateCropDto.name;
+      if (updateCropDto.name) {
+        crop.name = updateCropDto.name;
+      }
+
+      return await this.cropRepository.save(crop);
+    } catch (error) {
+      // console.error(`Error updating crop with ID ${id}:`, error);
+      throw new NotFoundException("Failed to update crop");
     }
-
-    return this.cropRepository.save(crop);
   }
 
   async deleteCropById(
