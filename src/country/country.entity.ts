@@ -12,7 +12,7 @@ import { Farm } from "../farm/farm.entity";
 @Entity({ name: "country", schema: "public" })
 export class Country {
   @PrimaryGeneratedColumn("uuid")
-  id: number;
+  id: string;
 
   @Column()
   name: string;

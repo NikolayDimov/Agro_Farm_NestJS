@@ -19,7 +19,7 @@ export class CropController {
   constructor(private readonly cropService: CropService) {}
 
   @Post("/createCrop")
-  async createCountry(@Body() createCropDto: CreateCropDto) {
+  async createCrop(@Body() createCropDto: CreateCropDto) {
     return this.cropService.createCrop(createCropDto);
   }
 
@@ -42,7 +42,9 @@ export class CropController {
   }
 
   @Delete(":id")
-  async deleteCropById(@Param("id") id: string): Promise<void> {
+  async deleteCropById(
+    @Param("id") id: string,
+  ): Promise<{ id: string; name: string; message: string }> {
     return this.cropService.deleteCropById(id);
   }
 }

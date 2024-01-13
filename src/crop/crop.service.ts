@@ -71,13 +71,23 @@ export class CropService {
     return this.cropRepository.save(crop);
   }
 
-  async deleteCropById(id: string): Promise<void> {
+  async deleteCropById(
+    id: string,
+  ): Promise<{ id: string; name: string; message: string }> {
     try {
       // findOneOrFail expects an object with a "where" property
-      const farm = await this.cropRepository.findOneOrFail({ where: { id } });
+      const crop = await this.cropRepository.findOneOrFail({
+        where: { id },
+      });
+      const { name } = crop;
       // Soft delete by setting the "deleted" property
-      farm.deleted = new Date();
-      await this.cropRepository.save(farm);
+      crop.deleted = new Date();
+      await this.cropRepository.save(crop);
+      return {
+        id,
+        name,
+        message: `Successfully deleted Crop with id ${id} and name ${name}`,
+      };
     } catch (error) {
       throw new NotFoundException(`Crop with id ${id} not found`);
     }
