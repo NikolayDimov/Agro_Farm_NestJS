@@ -11,25 +11,22 @@ import {
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
 import { CreateFarmDto } from "./dtos/create-farm.dto";
-import { FarmService } from "./farm.service";
-import { CountryService } from "../country/country.service";
+import { CreateFarmOnlyDto } from "./dtos/create-farm-only.dto";
 import { UpdateFarmDto } from "./dtos/update-farm.dto";
+import { FarmService } from "./farm.service";
 
 @Controller("farm")
 @UseGuards(AuthGuard)
 export class FarmController {
-  constructor(
-    private farmService: FarmService,
-    private countryService: CountryService,
-  ) {}
+  constructor(private farmService: FarmService) {}
 
   // Cteare Farm and must provide existing Country. If there is no Country - can't create Farm
   @Post("/createFarm")
-  async createFarm(@Body() createFarmDto: CreateFarmDto) {
-    return this.farmService.createFarmOnly(createFarmDto);
+  async createFarm(@Body() createFarmOnlyDto: CreateFarmOnlyDto) {
+    return this.farmService.createFarmOnly(createFarmOnlyDto);
   }
 
-  // Cteare Farm and create new Country. If there is no Country - create new Country. If there is a Country - select existing Country
+  // Cteare Farm and create new Country. If there is no Country - create new Country. If there is a Country - select from existing Country
   @Post("createFarmWithCountry")
   async createFarmWithCountry(@Body() createFarmDto: CreateFarmDto) {
     const createdFarm =
@@ -59,13 +56,13 @@ export class FarmController {
       const transformedFarm = await this.farmService.findById(id);
       return { data: transformedFarm };
     } catch (error) {
-      console.error("Error fetching farms:", error);
+      console.error("Error fetching farm:", error);
 
       if (error instanceof NotFoundException) {
-        return { error: "No farms found" };
+        return { error: "No farm found" };
       }
 
-      return { error: "An error occurred while fetching farms" };
+      return { error: "An error occurred while fetching farm" };
     }
   }
 

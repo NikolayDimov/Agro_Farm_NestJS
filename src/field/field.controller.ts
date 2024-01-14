@@ -1,5 +1,6 @@
 import {
   Controller,
+  UseGuards,
   Get,
   Post,
   Body,
@@ -7,33 +8,35 @@ import {
   Param,
   Delete,
 } from "@nestjs/common";
-import { FieldService } from "./field.service";
+import { AuthGuard } from "../auth/auth.guard";
 import { CreateFieldDto } from "./dtos/create-field.dto";
+import { CreateFieldOnlyDto } from "./dtos/create-field-only.dto";
+//import { UpdateFieldDto } from "./dtos/update-field.dto";
+import { FieldService } from "./field.service";
 
 @Controller("field")
+@UseGuards(AuthGuard)
 export class FieldController {
   constructor(private fieldService: FieldService) {}
 
+  // Cteare Field Only. No soil
   @Post("/createField")
-  async createField(@Body() createFieldDto: CreateFieldDto) {
-    return this.fieldService.createField(createFieldDto);
+  async createField(@Body() createFieldOnlyDto: CreateFieldOnlyDto) {
+    return this.fieldService.createFieldOnly(createFieldOnlyDto);
+  }
+
+  // Cteare Field and create new Soil. If there is no Soil - create new Soil. If there is a Soil - select from existing Soil
+  @Post("createFieldWithSoil")
+  async createFieldWithSoil(@Body() createFieldDto: CreateFieldDto) {
+    const createdField =
+      await this.fieldService.createFieldWithSoil(createFieldDto);
+    return { data: createdField };
   }
 
   @Get("getAll")
-  async getAllFields(): Promise<{ data?; error?: string }> {
+  async getAllFields() {
     try {
-      const fields = await this.fieldService.findAll();
-
-      // Transform the data before returning
-      const transformedFields = fields.map((field) => ({
-        id: field.id,
-        name: field.name,
-        created: field.created,
-        updated: field.updated,
-        deleted: field.deleted,
-        polygons: field.polygons,
-      }));
-
+      const transformedFields = await this.fieldService.findAllWithSoil();
       return { data: transformedFields };
     } catch (error) {
       console.error("Error fetching fields:", error);
@@ -46,34 +49,31 @@ export class FieldController {
     }
   }
 
-  @Get("getAllFieldsDetails")
-  async getAllFieldsWithDetails() {
-    try {
-      const fields = await this.fieldService.getAllFieldsWithDetails();
-      return { data: fields };
-    } catch (error) {
-      console.error("Error fetching fields with details:", error);
-      return { error: "An error occurred while fetching fields with details" };
-    }
-  }
-
   @Get(":id")
   async getFieldById(@Param("id") id: string) {
     try {
-      const field = await this.fieldService.findById(id);
-      return { data: field };
+      const transformedField = await this.fieldService.findById(id);
+      return { data: transformedField };
     } catch (error) {
-      console.error("Error fetching field by ID:", error);
+      console.error("Error fetching field:", error);
 
       if (error instanceof NotFoundException) {
-        return { error: "Field not found" };
+        return { error: "No field found" };
       }
 
-      return { error: "An error occurred while fetching field by ID" };
+      return { error: "An error occurred while fetching field" };
     }
   }
+
   @Delete(":id")
-  async deleteFieldById(@Param("id") id: string): Promise<void> {
-    await this.fieldService.deleteFieldById(id);
+  async deleteFieldById(
+    @Param("id") id: string,
+  ): Promise<{ id: string; name: string; message: string }> {
+    try {
+      return this.fieldService.deleteFieldById(id);
+    } catch (error) {
+      console.error("Error deleting field:", error);
+      throw new NotFoundException("Failed to delete field");
+    }
   }
 }

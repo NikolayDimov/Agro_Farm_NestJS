@@ -1,5 +1,5 @@
-import { Expose } from "class-transformer"
-import { IsString, IsNotEmpty, Matches } from "class-validator"
+import { Expose } from "class-transformer";
+import { IsString, IsNotEmpty, Matches } from "class-validator";
 
 export class UpdateCountryDto {
   @Expose()
@@ -9,5 +9,5 @@ export class UpdateCountryDto {
   @Matches(/^[A-Za-z0-9\s]+$/, {
     message: "Name must contain only letters and numbers",
   })
-  name: string
+  name: string;
 }

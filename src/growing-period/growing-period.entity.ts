@@ -15,7 +15,7 @@ export class GrowingPeriod {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @ManyToOne(() => Field, (field) => field.growingPeriods)
+  @ManyToOne(() => Field, (field) => field.id)
   @JoinColumn({ name: "field_id" })
   field: Field;
 

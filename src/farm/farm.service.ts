@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Farm } from "./farm.entity";
 import { CreateFarmDto } from "./dtos/create-farm.dto";
+import { CreateFarmOnlyDto } from "./dtos/create-farm-only.dto";
 import { UpdateFarmDto } from "./dtos/update-farm.dto";
 import { Country } from "../country/country.entity";
 // import { Field } from "../field/field.entity";
@@ -15,21 +16,10 @@ export class FarmService {
     private readonly countryRepository: Repository<Country>,
   ) {}
 
-  async createFarmOnly(createFarmDto: CreateFarmDto): Promise<Farm> {
-    const { name, countryName } = createFarmDto;
+  async createFarmOnly(createFarmOnlyDto: CreateFarmOnlyDto): Promise<Farm> {
+    const { name } = createFarmOnlyDto;
 
-    const country = await this.countryRepository.findOne({
-      where: { name: countryName },
-    });
-
-    if (!country) {
-      throw new Error(`Country with name ${countryName} not found.`);
-    }
-
-    const newFarm = this.farmRepository.create({
-      name,
-      country,
-    });
+    const newFarm = this.farmRepository.create({ name });
 
     return this.farmRepository.save(newFarm);
   }

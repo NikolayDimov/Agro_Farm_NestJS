@@ -4,11 +4,10 @@ import { FarmController } from "./farm.controller";
 import { FarmService } from "./farm.service";
 import { Farm } from "./farm.entity";
 import { CountryModule } from "../country/country.module";
-import { CountryService } from "../country/country.service";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Farm]), CountryModule],
   controllers: [FarmController],
-  providers: [FarmService, CountryService],
+  providers: [FarmService],
 })
 export class FarmModule {}
