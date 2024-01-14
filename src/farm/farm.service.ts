@@ -13,7 +13,7 @@ export class FarmService {
     private readonly countryRepository: Repository<Country>,
   ) {}
 
-  async createFarm(createFarmDto: CreateFarmDto): Promise<Farm> {
+  async createFarmOnly(createFarmDto: CreateFarmDto): Promise<Farm> {
     const { name, countryName } = createFarmDto;
 
     const country = await this.countryRepository.findOne({
@@ -32,28 +32,83 @@ export class FarmService {
     return this.farmRepository.save(newFarm);
   }
 
-  async findAll(): Promise<Farm[]> {
-    try {
-      const farms = await this.farmRepository
-        .createQueryBuilder("farm")
-        .leftJoinAndSelect("farm.country", "country")
-        .andWhere("farm.deleted IS NULL")
-        .getMany();
+  async createFarmWithCountry(createFarmDto: CreateFarmDto) {
+    const { name, countryName } = createFarmDto;
 
-      if (!farms.length) {
-        throw new NotFoundException("No farms found");
-      }
+    // Check if the country exists
+    let country = await this.countryRepository.findOne({
+      where: { name: countryName },
+    });
 
-      console.log("Fetched Farms:", farms);
-
-      return farms;
-    } catch (error) {
-      console.error("Error fetching farms:", error);
-      throw error;
+    // If the country doesn't exist, create it
+    if (!country) {
+      country = await this.countryRepository.create({ name: countryName });
+      await this.countryRepository.save(country);
     }
+
+    // Create the farm and associate it with the country
+    const farm = this.farmRepository.create({
+      name,
+      country,
+    });
+
+    await this.farmRepository.save(farm);
+
+    // Return the created farm
+    return farm;
   }
 
-  async findById(id: string): Promise<Farm> {
+  // --- First function with Typeorm request ---
+  // async findAll(): Promise<Farm[]> {
+  //   try {
+  //     const farms = await this.farmRepository
+  //       .createQueryBuilder("farm")
+  //       .leftJoinAndSelect("farm.country", "country")
+  //       .andWhere("farm.deleted IS NULL")
+  //       .getMany();
+
+  //     if (!farms.length) {
+  //       throw new NotFoundException("No farms found");
+  //     }
+
+  //     console.log("Fetched Farms:", farms);
+
+  //     return farms;
+  //   } catch (error) {
+  //     console.error("Error fetching farms:", error);
+  //     throw error;
+  //   }
+  // }
+
+  // Use for findAllWithCountries and findById
+  private transformFarm(farm) {
+    return {
+      id: farm.id,
+      name: farm.name,
+      created: farm.created,
+      updated: farm.updated,
+      deleted: farm.deleted,
+      country: farm.country ? this.transformCountry(farm.country) : null,
+      fields: [],
+    };
+  }
+
+  private transformCountry(country) {
+    return {
+      id: country.id,
+      name: country.name,
+      created: country.created,
+      updated: country.updated,
+      deleted: country.deleted,
+    };
+  }
+
+  async findAllWithCountries() {
+    const farms = await this.farmRepository.find({ relations: ["country"] });
+    return farms.map((farm) => this.transformFarm(farm));
+  }
+
+  async findById(id: string) {
     try {
       const farm = await this.farmRepository
         .createQueryBuilder("farm")
@@ -66,14 +121,14 @@ export class FarmService {
         throw new NotFoundException(`Farm with ID ${id} not found`);
       }
 
-      return farm;
+      return this.transformFarm(farm);
     } catch (error) {
       console.error("Error fetching farm by ID:", error);
       throw error;
     }
   }
 
-  async deleteFarmById(id: string): Promise<void> {
+  async deleteFarmOnlyById(id: string): Promise<void> {
     try {
       // findOneOrFail expects an object with a "where" property
       const farm = await this.farmRepository.findOneOrFail({ where: { id } });
@@ -83,6 +138,34 @@ export class FarmService {
       await this.farmRepository.save(farm);
     } catch (error) {
       throw new NotFoundException(`Farm with id ${id} not found`);
+    }
+  }
+
+  async deleteFarmAndCountryById(farmId: string): Promise<void> {
+    try {
+      // Find the farm and its associated country
+      const farm = await this.farmRepository.findOneOrFail({
+        where: { id: farmId },
+        relations: ["country"],
+      });
+
+      if (!farm) {
+        throw new NotFoundException(`Farm with id ${farmId} not found`);
+      }
+
+      const country = farm.country;
+
+      // Soft delete the farm
+      farm.deleted = new Date();
+      await this.farmRepository.save(farm);
+
+      // Soft delete the country
+      if (country) {
+        country.deleted = new Date();
+        await this.countryRepository.save(country);
+      }
+    } catch (error) {
+      throw new NotFoundException(`Farm or Country not found for the given ID`);
     }
   }
 }

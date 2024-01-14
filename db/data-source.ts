@@ -1,7 +1,7 @@
-import { DataSource, DataSourceOptions } from "typeorm";
+import { DataSource, DataSourceOptions } from "typeorm"
 // require("dotenv").config();
-import * as dotenv from "dotenv";
-dotenv.config();
+import * as dotenv from "dotenv"
+dotenv.config()
 
 export const dataSourceOptions: DataSourceOptions = {
   type: "postgres",
@@ -15,7 +15,7 @@ export const dataSourceOptions: DataSourceOptions = {
   synchronize: false,
   // logging: true,
   // schema: "public",
-};
+}
 
-const dataSource = new DataSource(dataSourceOptions);
-export default dataSource;
+const dataSource = new DataSource(dataSourceOptions)
+export default dataSource

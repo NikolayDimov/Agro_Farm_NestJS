@@ -1,5 +1,6 @@
 import {
   Controller,
+  UseGuards,
   Post,
   Body,
   Param,
@@ -7,11 +8,13 @@ import {
   Delete,
   NotFoundException,
 } from "@nestjs/common";
+import { AuthGuard } from "../auth/auth.guard";
 import { CreateFarmDto } from "./dtos/create-farm.dto";
 import { FarmService } from "./farm.service";
 import { CountryService } from "../country/country.service";
 
 @Controller("farm")
+@UseGuards(AuthGuard)
 export class FarmController {
   constructor(
     private farmService: FarmService,
@@ -20,32 +23,20 @@ export class FarmController {
 
   @Post("/createFarm")
   async createFarm(@Body() createFarmDto: CreateFarmDto) {
-    return this.farmService.createFarm(createFarmDto);
+    return this.farmService.createFarmOnly(createFarmDto);
+  }
+
+  @Post("createFarmWithCountry")
+  async createFarmWithCountry(@Body() createFarmDto: CreateFarmDto) {
+    const createdFarm =
+      await this.farmService.createFarmWithCountry(createFarmDto);
+    return { data: createdFarm };
   }
 
   @Get("getAll")
-  async getAllFarms(): Promise<{ data?; error?: string }> {
+  async getAllFarms() {
     try {
-      const farms = await this.farmService.findAll();
-
-      const transformedFarms = farms.map((farm) => ({
-        id: farm.id,
-        name: farm.name,
-        created: farm.created,
-        updated: farm.updated,
-        deleted: farm.deleted,
-        country: farm.country
-          ? {
-              id: farm.country.id,
-              name: farm.country.name,
-              created: farm.country.created,
-              updated: farm.country.updated,
-              deleted: farm.country.deleted,
-            }
-          : null,
-        fields: [],
-      }));
-
+      const transformedFarms = await this.farmService.findAllWithCountries();
       return { data: transformedFarms };
     } catch (error) {
       console.error("Error fetching farms:", error);
@@ -61,33 +52,26 @@ export class FarmController {
   @Get(":id")
   async getFarmById(@Param("id") id: string) {
     try {
-      const farm = await this.farmService.findById(id);
-
-      const transformedFarm = {
-        id: farm.id,
-        name: farm.name,
-        created: farm.created,
-        updated: farm.updated,
-        deleted: farm.deleted,
-        country: {
-          id: farm.country.id,
-          name: farm.country.name,
-          created: farm.country.created,
-          updated: farm.country.updated,
-          deleted: farm.country.deleted,
-        },
-        fields: [],
-      };
-
+      const transformedFarm = await this.farmService.findById(id);
       return { data: transformedFarm };
     } catch (error) {
-      console.error("Error fetching farm by ID:", error);
-      throw new NotFoundException("Farm not found");
+      console.error("Error fetching farms:", error);
+
+      if (error instanceof NotFoundException) {
+        return { error: "No farms found" };
+      }
+
+      return { error: "An error occurred while fetching farms" };
     }
   }
 
   @Delete(":id")
   async deleteFarmById(@Param("id") id: string): Promise<void> {
-    await this.farmService.deleteFarmById(id);
+    await this.farmService.deleteFarmOnlyById(id);
+  }
+
+  @Delete(":id")
+  async deleteFarmAndCountryById(@Param("id") id: string): Promise<void> {
+    await this.farmService.deleteFarmAndCountryById(id);
   }
 }

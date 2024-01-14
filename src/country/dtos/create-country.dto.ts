@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, Matches } from "class-validator";
+import { IsString, IsNotEmpty, Matches } from "class-validator"
 
 export class CreateCountryDto {
   @IsNotEmpty({ message: "Name cannot be empty" })
@@ -6,5 +6,5 @@ export class CreateCountryDto {
   @Matches(/^[A-Za-z0-9\s]+$/, {
     message: "Name must contain only letters and numbers",
   })
-  name: string;
+  name: string
 }

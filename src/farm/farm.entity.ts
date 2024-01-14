@@ -25,7 +25,7 @@ export class Farm {
   // @ManyToOne(() => User, (user) => user.farms)
   // user: User;
 
-  @ManyToOne(() => Country, (country) => country.farms)
+  @ManyToOne(() => Country, (country) => country.farms, { onDelete: "CASCADE" })
   @JoinColumn({ name: "country_id" })
   country: Country;
 
