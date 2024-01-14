@@ -3,7 +3,9 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Farm } from "./farm.entity";
 import { CreateFarmDto } from "./dtos/create-farm.dto";
+import { UpdateFarmDto } from "./dtos/update-farm.dto";
 import { Country } from "../country/country.entity";
+// import { Field } from "../field/field.entity";
 
 @Injectable()
 export class FarmService {
@@ -80,8 +82,8 @@ export class FarmService {
   //   }
   // }
 
-  // Use for findAllWithCountries and findById
-  private transformFarm(farm) {
+  // transformFarm and transformCountry -- use for findAllWithCountries and findById
+  private transformFarm(farm: Farm) {
     return {
       id: farm.id,
       name: farm.name,
@@ -93,7 +95,7 @@ export class FarmService {
     };
   }
 
-  private transformCountry(country) {
+  private transformCountry(country: Country) {
     return {
       id: country.id,
       name: country.name,
@@ -128,44 +130,102 @@ export class FarmService {
     }
   }
 
-  async deleteFarmOnlyById(id: string): Promise<void> {
+  async updateFarm(id: string, updateFarmDto: UpdateFarmDto): Promise<Farm> {
+    try {
+      // Find the farm by ID
+      const farm = await this.farmRepository.findOneOrFail({
+        where: { id },
+        relations: ["country"],
+      });
+
+      // If countryName is provided, update the farm's country
+      if (updateFarmDto.countryName) {
+        // Check if the new country exists
+        let newCountry = await this.countryRepository.findOne({
+          where: { name: updateFarmDto.countryName },
+        });
+
+        // If the new country doesn't exist, create it
+        if (!newCountry) {
+          newCountry = await this.countryRepository.create({
+            name: updateFarmDto.countryName,
+          });
+          await this.countryRepository.save(newCountry);
+        }
+
+        // Update the farm's country
+        farm.country = newCountry;
+      }
+
+      // Update other fields if provided
+      if (updateFarmDto.name) {
+        farm.name = updateFarmDto.name;
+      }
+
+      // Save the updated farm
+      const updatedFarm = await this.farmRepository.save(farm);
+
+      return updatedFarm;
+    } catch (error) {
+      console.error("Error updating farm:", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(`Farm with ID ${id} not found`);
+      }
+
+      throw new Error("An error occurred while updating the farm");
+    }
+  }
+
+  async deleteFarmOnlyById(
+    id: string,
+  ): Promise<{ id: string; name: string; message: string }> {
     try {
       // findOneOrFail expects an object with a "where" property
       const farm = await this.farmRepository.findOneOrFail({ where: { id } });
 
+      const { name } = farm;
       // Soft delete by setting the "deleted" property
       farm.deleted = new Date();
       await this.farmRepository.save(farm);
+      return {
+        id,
+        name,
+        message: `Successfully deleted Farm with id ${id} and name ${name}`,
+      };
     } catch (error) {
       throw new NotFoundException(`Farm with id ${id} not found`);
     }
   }
 
-  async deleteFarmAndCountryById(farmId: string): Promise<void> {
-    try {
-      // Find the farm and its associated country
-      const farm = await this.farmRepository.findOneOrFail({
-        where: { id: farmId },
-        relations: ["country"],
-      });
+  //  The function must delete farm and related country - now Delete Farm only, not Country
+  // Function not work
 
-      if (!farm) {
-        throw new NotFoundException(`Farm with id ${farmId} not found`);
-      }
+  // async deleteFarmAndCountryById(farmId: string): Promise<void> {
+  //   try {
+  //     // Find the farm and its associated country
+  //     const farm = await this.farmRepository.findOneOrFail({
+  //       where: { id: farmId },
+  //       relations: ["country"],
+  //     });
 
-      const country = farm.country;
+  //     if (!farm) {
+  //       throw new NotFoundException(`Farm with id ${farmId} not found`);
+  //     }
 
-      // Soft delete the farm
-      farm.deleted = new Date();
-      await this.farmRepository.save(farm);
+  //     const country = farm.country;
 
-      // Soft delete the country
-      if (country) {
-        country.deleted = new Date();
-        await this.countryRepository.save(country);
-      }
-    } catch (error) {
-      throw new NotFoundException(`Farm or Country not found for the given ID`);
-    }
-  }
+  //     // Soft delete the farm
+  //     farm.deleted = new Date();
+  //     await this.farmRepository.save(farm);
+
+  //     // Soft delete the country
+  //     if (country) {
+  //       country.deleted = new Date();
+  //       await this.countryRepository.save(country);
+  //     }
+  //   } catch (error) {
+  //     throw new NotFoundException(`Farm or Country not found for the given ID`);
+  //   }
+  // }
 }
