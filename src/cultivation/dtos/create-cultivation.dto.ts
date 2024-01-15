@@ -1,18 +1,17 @@
-import { IsNotEmpty, IsUUID } from "class-validator";
+import { IsNotEmpty } from "class-validator";
+import { MachineDto } from "src/machine/dtos/machine.dto";
 
 export class CreateCultivationDto {
   @IsNotEmpty({ message: "Date cannot be empty" })
   date: Date;
 
-  @IsNotEmpty()
-  @IsUUID()
+  // @IsNotEmpty()
+  // @IsUUID()
   growingPeriod: string;
 
   @IsNotEmpty()
-  @IsUUID()
   cultivationType: string;
 
   @IsNotEmpty()
-  @IsUUID()
-  machine: string;
+  machine: MachineDto;
 }

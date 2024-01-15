@@ -27,7 +27,7 @@ export class FieldService {
     return this.fieldRepository.save(newField);
   }
 
-  async createFieldWithSoil(createFieldDto: CreateFieldDto) {
+  async createFieldWithSoil(createFieldDto: CreateFieldDto): Promise<Field> {
     try {
       const { name, polygons, soilName } = createFieldDto;
 

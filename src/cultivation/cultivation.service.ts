@@ -2,17 +2,24 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Cultivation } from "./cultivation.entity";
-//import { CreateCultivationDto } from "./dtos/create-cultivation.dto";
+import { CreateCultivationDto } from "./dtos/create-cultivation.dto";
 import { CreateCultivationOnlyDto } from "./dtos/create-cultivation-only.dto";
 //import { UpdateCultivationDto } from "./dtos/update-cultivation.dto";
-//import { Soil } from "../soil/soil.entity";
+import { CultivationType } from "../cultivation-type/cultivation-type.entity";
+import { Machine } from "../machine/machine.entity";
+import { GrowingPeriod } from "../growing-period/growing-period.entity";
 
 @Injectable()
 export class CultivationService {
   constructor(
     @InjectRepository(Cultivation)
     private cultivationRepository: Repository<Cultivation>,
-    //@InjectRepository(Soil) private soilRepository: Repository<Soil>,
+    @InjectRepository(GrowingPeriod)
+    private growingPeriodRepository: Repository<GrowingPeriod>,
+    @InjectRepository(CultivationType)
+    private cultivationTypeRepository: Repository<CultivationType>,
+    @InjectRepository(Machine)
+    private machineRepository: Repository<Machine>,
   ) {}
 
   async createCultivationOnly(
@@ -25,37 +32,68 @@ export class CultivationService {
     return this.cultivationRepository.save(newCultivation);
   }
 
-  //   async createFieldWithSoil(createFieldDto: CreateFieldDto) {
-  //     try {
-  //       const { name, polygons, soilName } = createFieldDto;
+  async createCultivationWithAttributes(
+    createCultivationDto: CreateCultivationDto,
+  ): Promise<Cultivation> {
+    try {
+      const { date, cultivationType, machine } = createCultivationDto;
 
-  //       // Check if the soil exists
-  //       let soil = await this.soilRepository.findOne({
-  //         where: { name: soilName },
-  //       });
+      // Always create a new growing period
+      const newGrowingPeriod = await this.growingPeriodRepository.create();
+      await this.growingPeriodRepository.save(newGrowingPeriod);
 
-  //       // If the soil doesn't exist, create it
-  //       if (!soil) {
-  //         soil = await this.soilRepository.create({ name: soilName });
-  //         await this.soilRepository.save(soil);
-  //       }
+      // Check if the cultivationType exists
+      let cultivationTypeObj = await this.cultivationTypeRepository.findOne({
+        where: { name: cultivationType },
+      });
 
-  //       // Create the field and associate it with the soil
-  //       const field = this.fieldRepository.create({
-  //         name,
-  //         polygons,
-  //         soil,
-  //       });
+      // If the cultivationType doesn't exist, create it
+      if (!cultivationTypeObj) {
+        cultivationTypeObj = await this.cultivationTypeRepository.create({
+          name: cultivationType,
+        });
+        await this.cultivationTypeRepository.save(cultivationTypeObj);
+      }
 
-  //       await this.fieldRepository.save(field);
+      // Check if the machine exists
+      let machineObj = await this.machineRepository.findOne({
+        where: {
+          brand: machine.brand,
+          model: machine.model,
+          registerNumber: machine.registerNumber,
+        },
+      });
 
-  //       // Return the created field
-  //       return field;
-  //     } catch (error) {
-  //       console.error("Error creating field with soil:", error);
-  //       throw error;
-  //     }
-  //   }
+      // If the machine doesn't exist, create it
+      if (!machineObj) {
+        machineObj = await this.machineRepository.create({
+          brand: machine.brand,
+          model: machine.model,
+          registerNumber: machine.registerNumber,
+        });
+        await this.machineRepository.save(machineObj);
+      }
+
+      // Create the cultivation and associate it with the growing_period, cultivation_type, and machine
+      const cultivation = this.cultivationRepository.create({
+        date,
+        growingPeriod: newGrowingPeriod,
+        cultivationType: cultivationTypeObj,
+        machine: machineObj,
+      });
+
+      await this.cultivationRepository.save(cultivation);
+
+      // Return the created field
+      return cultivation;
+    } catch (error) {
+      console.error(
+        "Error creating cultivation with growing_period, cultivation_type, and machine:",
+        error,
+      );
+      throw error;
+    }
+  }
 
   //   // transformField and transformSoil -- use for findAllWithSoil and findById
   //   private transformField(field: Field): Field {

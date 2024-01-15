@@ -10,7 +10,7 @@ import {
   //Delete,
 } from "@nestjs/common";
 import { AuthGuard } from "../auth/auth.guard";
-//import { CreateCultivationDto } from "./dtos/create-cultivation.dto";
+import { CreateCultivationDto } from "./dtos/create-cultivation.dto";
 import { CreateCultivationOnlyDto } from "./dtos/create-cultivation-only.dto";
 //import { UpdateCultivationDto } from "./dtos/update-cultivation.dto";
 import { CultivationService } from "./cultivation.service";
@@ -30,29 +30,42 @@ export class CultivationController {
     );
   }
 
-  //   // Cteare Field and create new Soil. If there is no Soil - create new Soil. If there is a Soil - select from existing Soil
-  //   @Post("createFieldWithSoil")
-  //   async createFieldWithSoil(@Body() createFieldDto: CreateFieldDto) {
-  //     const createdField =
-  //       await this.fieldService.createFieldWithSoil(createFieldDto);
-  //     return { data: createdField };
+  // Cteare Cultivation with growing_period, cultivation_type and machine. If there is no created Attributes - create new cultivation_type and machine. If there is a existing Attributes - select from existing cultivation_type and machine. Growing_period is UUID and always must be created
+  //   @Post("createCultivationWithAttributes")
+  //   async createCultivationWithAttributes(
+  //     @Body() createCultivationDto: CreateCultivationDto,
+  //   ) {
+  //     const createdCultivation =
+  //       await this.cultivationService.createCultivationWithAttributes(
+  //         createCultivationDto,
+  //       );
+  //     return { data: createdCultivation };
   //   }
 
-  //   @Get("getAll")
-  //   async getAllFields() {
-  //     try {
-  //       const transformedFields = await this.fieldService.findAllWithSoil();
-  //       return { data: transformedFields };
-  //     } catch (error) {
-  //       console.error("Error fetching fields:", error);
+  @Post("createCultivationWithAttributes")
+  async createCultivationWithAttributes(
+    @Body() createCultivationDto: CreateCultivationDto,
+  ) {
+    return this.cultivationService.createCultivationWithAttributes(
+      createCultivationDto,
+    );
+  }
 
-  //       if (error instanceof NotFoundException) {
-  //         return { error: "No fields found" };
-  //       }
+  // @Get("getAll")
+  // async getAllFields() {
+  //   try {
+  //     const transformedFields = await this.fieldService.findAllWithSoil();
+  //     return { data: transformedFields };
+  //   } catch (error) {
+  //     console.error("Error fetching fields:", error);
 
-  //       return { error: "An error occurred while fetching fields" };
+  //     if (error instanceof NotFoundException) {
+  //       return { error: "No fields found" };
   //     }
+
+  //     return { error: "An error occurred while fetching fields" };
   //   }
+  // }
 
   //   @Get(":id")
   //   async getFieldById(@Param("id") id: string) {

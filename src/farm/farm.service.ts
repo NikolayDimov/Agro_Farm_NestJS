@@ -24,7 +24,7 @@ export class FarmService {
     return this.farmRepository.save(newFarm);
   }
 
-  async createFarmWithCountry(createFarmDto: CreateFarmDto) {
+  async createFarmWithCountry(createFarmDto: CreateFarmDto): Promise<Farm> {
     const { name, countryName } = createFarmDto;
 
     // Check if the country exists
