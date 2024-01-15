@@ -9,7 +9,7 @@ import {
   JoinColumn,
   // OneToMany,
 } from "typeorm";
-import { MultiPolygon, Position } from "geojson";
+import { MultiPolygon } from "geojson";
 import { Farm } from "../farm/farm.entity";
 import { Soil } from "../soil/soil.entity";
 // import { GrowingPeriod } from "../growing-period/growing-period.entity";
@@ -23,7 +23,7 @@ export class Field {
   name: string;
 
   @Column({ type: "jsonb", nullable: false })
-  polygons: MultiPolygon | Position[][][];
+  polygons: MultiPolygon;
 
   // Connect to the user - not for our project
   // @ManyToOne(() => User, (user) => user.farms)

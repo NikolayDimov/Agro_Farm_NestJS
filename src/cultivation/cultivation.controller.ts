@@ -5,7 +5,7 @@ import {
   Post,
   //Patch,
   Body,
-  //NotFoundException,
+  // NotFoundException,
   //Param,
   //Delete,
 } from "@nestjs/common";
@@ -25,30 +25,37 @@ export class CultivationController {
   async createCultivation(
     @Body() createCultivationOnlyDto: CreateCultivationOnlyDto,
   ) {
-    return this.cultivationService.createCultivationOnly(
-      createCultivationOnlyDto,
-    );
+    try {
+      return this.cultivationService.createCultivationOnly(
+        createCultivationOnlyDto,
+      );
+    } catch (error) {
+      console.error("Error creating cultivation with attributes:", error);
+      return {
+        message: "An error occurred while creating the cultivation.",
+        statusCode: 500,
+      };
+    }
   }
 
   // Cteare Cultivation with growing_period, cultivation_type and machine. If there is no created Attributes - create new cultivation_type and machine. If there is a existing Attributes - select from existing cultivation_type and machine. Growing_period is UUID and always must be created
-  //   @Post("createCultivationWithAttributes")
-  //   async createCultivationWithAttributes(
-  //     @Body() createCultivationDto: CreateCultivationDto,
-  //   ) {
-  //     const createdCultivation =
-  //       await this.cultivationService.createCultivationWithAttributes(
-  //         createCultivationDto,
-  //       );
-  //     return { data: createdCultivation };
-  //   }
-
   @Post("createCultivationWithAttributes")
   async createCultivationWithAttributes(
     @Body() createCultivationDto: CreateCultivationDto,
   ) {
-    return this.cultivationService.createCultivationWithAttributes(
-      createCultivationDto,
-    );
+    try {
+      const createdCultivation =
+        await this.cultivationService.createCultivationWithAttributes(
+          createCultivationDto,
+        );
+      return { data: createdCultivation };
+    } catch (error) {
+      console.error("Error creating cultivation with attributes:", error);
+      return {
+        message: "An error occurred while creating the cultivation.",
+        statusCode: 500,
+      };
+    }
   }
 
   // @Get("getAll")

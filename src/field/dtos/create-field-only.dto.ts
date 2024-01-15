@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsString, Matches, IsJSON } from "class-validator";
-import { MultiPolygon, Position } from "geojson";
+import { IsNotEmpty, IsString, Matches, IsObject } from "class-validator";
+import { MultiPolygon } from "geojson";
 
 export class CreateFieldOnlyDto {
   @IsNotEmpty({ message: "Name cannot be empty" })
@@ -10,6 +10,6 @@ export class CreateFieldOnlyDto {
   name: string;
 
   @IsNotEmpty({ message: "Polygons cannot be empty" })
-  @IsJSON({ message: "Polygons must be a valid GeoJSON object" })
-  polygons: MultiPolygon | Position[][][];
+  @IsObject({ message: "Polygons must be a valid GeoJSON object" })
+  polygons: MultiPolygon;
 }

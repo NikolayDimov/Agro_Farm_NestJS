@@ -23,15 +23,31 @@ export class FarmController {
   // Cteare Farm and must provide existing Country. If there is no Country - can't create Farm
   @Post("/createFarm")
   async createFarm(@Body() createFarmOnlyDto: CreateFarmOnlyDto) {
-    return this.farmService.createFarmOnly(createFarmOnlyDto);
+    try {
+      return this.farmService.createFarmOnly(createFarmOnlyDto);
+    } catch (error) {
+      console.error("Error creating farm:", error);
+      return {
+        message: "An error occurred while creating the farm.",
+        statusCode: 500,
+      };
+    }
   }
 
   // Cteare Farm and create new Country. If there is no Country - create new Country. If there is a Country - select from existing Country
   @Post("createFarmWithCountry")
   async createFarmWithCountry(@Body() createFarmDto: CreateFarmDto) {
-    const createdFarm =
-      await this.farmService.createFarmWithCountry(createFarmDto);
-    return { data: createdFarm };
+    try {
+      const createdFarm =
+        await this.farmService.createFarmWithCountry(createFarmDto);
+      return { data: createdFarm };
+    } catch (error) {
+      console.error("Error creating farm with country:", error);
+      return {
+        message: "An error occurred while creating the farm.",
+        statusCode: 500,
+      };
+    }
   }
 
   @Get("getAll")

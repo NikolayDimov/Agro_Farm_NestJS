@@ -24,8 +24,11 @@ export class CountryController {
     try {
       return this.countryService.createCountry(createCountryDto);
     } catch (error) {
-      console.error("Error creating country:", error);
-      throw new NotFoundException("Failed to create country");
+      console.error("Error creating country", error);
+      return {
+        message: "An error occurred while creating the country.",
+        statusCode: 500,
+      };
     }
   }
 

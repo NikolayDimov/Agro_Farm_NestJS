@@ -7,6 +7,7 @@ import {
   UseGuards,
   Get,
   Request,
+  //Patch,
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthGuard } from "./auth.guard";
@@ -35,6 +36,9 @@ export class AuthController {
   getProfile(@Request() req) {
     return req.user;
   }
+
+  //   @Patch('/:id')
+  // update Param (id) new ParseUUID
 
   // LOGOUT NOT WORK IN BACK-END
   // @UseGuards(AuthGuard)

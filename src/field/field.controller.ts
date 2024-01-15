@@ -23,15 +23,31 @@ export class FieldController {
   // Cteare Field Only. No soil
   @Post("/createField")
   async createField(@Body() createFieldOnlyDto: CreateFieldOnlyDto) {
-    return this.fieldService.createFieldOnly(createFieldOnlyDto);
+    try {
+      return this.fieldService.createFieldOnly(createFieldOnlyDto);
+    } catch (error) {
+      console.error("Error creating field:", error);
+      return {
+        message: "An error occurred while creating the field.",
+        statusCode: 500,
+      };
+    }
   }
 
   // Cteare Field and create new Soil. If there is no Soil - create new Soil. If there is a Soil - select from existing Soil
   @Post("createFieldWithSoil")
   async createFieldWithSoil(@Body() createFieldDto: CreateFieldDto) {
-    const createdField =
-      await this.fieldService.createFieldWithSoil(createFieldDto);
-    return { data: createdField };
+    try {
+      const createdField =
+        await this.fieldService.createFieldWithSoil(createFieldDto);
+      return { data: createdField };
+    } catch (error) {
+      console.error("Error creating field eith soil:", error);
+      return {
+        message: "An error occurred while creating the field.",
+        statusCode: 500,
+      };
+    }
   }
 
   @Get("getAll")
