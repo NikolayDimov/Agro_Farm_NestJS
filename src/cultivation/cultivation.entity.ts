@@ -17,7 +17,7 @@ export class Cultivation {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  @Column({ type: "timestamp" })
   date: Date;
 
   @ManyToOne(() => GrowingPeriod, (growingPeriod) => growingPeriod.id)

@@ -1,6 +1,6 @@
 import { Expose, Type } from "class-transformer";
-import { FarmDto } from "src/farm/dtos/farm.dto";
-import { SoilDto } from "src/soil/dtos/soil.dto";
+import { FarmDto } from "../../farm/dtos/farm.dto";
+import { SoilDto } from "../../soil/dtos/soil.dto";
 
 export class FieldDto {
   @Expose()
