@@ -4,6 +4,7 @@ import { Repository } from "typeorm";
 import { Field } from "./field.entity";
 import { CreateFieldDto } from "./dtos/create-field.dto";
 import { CreateFieldOnlyDto } from "./dtos/create-field-only.dto";
+import { UpdateFieldDto } from "./dtos/update-field.dto";
 import { Soil } from "../soil/soil.entity";
 
 @Injectable()
@@ -112,6 +113,62 @@ export class FieldService {
     } catch (error) {
       console.error("Error fetching field by ID:", error);
       throw error;
+    }
+  }
+
+  async updateField(
+    id: string,
+    updateFieldDto: UpdateFieldDto,
+  ): Promise<Field> {
+    try {
+      // console.log("Received ID:", id);
+      // Find the field by ID
+      const field = await this.fieldRepository.findOneOrFail({
+        where: { id },
+        relations: ["soil"],
+      });
+
+      // If soilName is provided, update the field's soil
+      if (updateFieldDto.soilName) {
+        // Check if the new soil exists
+        let newSoil = await this.soilRepository.findOne({
+          where: { name: updateFieldDto.soilName },
+        });
+
+        // If the new soil doesn't exist, create it
+        if (!newSoil) {
+          newSoil = await this.soilRepository.create({
+            name: updateFieldDto.soilName,
+          });
+          await this.soilRepository.save(newSoil);
+        }
+
+        // Update the field's's soil
+        field.soil = newSoil;
+      }
+
+      // Update field'name
+      if (updateFieldDto.name) {
+        field.name = updateFieldDto.name;
+      }
+      // Update the fields'polygons
+      if (updateFieldDto.polygons) {
+        field.polygons = updateFieldDto.polygons;
+      }
+
+      // Save the updated field
+      const updatedField = await this.fieldRepository.save(field);
+
+      // console.log("Updated Field:", updatedField);
+      return updatedField;
+    } catch (error) {
+      console.error("Error updating field:", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(`Field with ID ${id} not found`);
+      }
+
+      throw new Error("An error occurred while updating the field");
     }
   }
 

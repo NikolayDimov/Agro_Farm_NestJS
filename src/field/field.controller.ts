@@ -3,6 +3,7 @@ import {
   UseGuards,
   Get,
   Post,
+  Patch,
   Body,
   NotFoundException,
   Param,
@@ -11,7 +12,7 @@ import {
 import { AuthGuard } from "../auth/auth.guard";
 import { CreateFieldDto } from "./dtos/create-field.dto";
 import { CreateFieldOnlyDto } from "./dtos/create-field-only.dto";
-//import { UpdateFieldDto } from "./dtos/update-field.dto";
+import { UpdateFieldDto } from "./dtos/update-field.dto";
 import { FieldService } from "./field.service";
 
 @Controller("field")
@@ -62,6 +63,28 @@ export class FieldController {
       }
 
       return { error: "An error occurred while fetching field" };
+    }
+  }
+
+  @Patch(":id")
+  async updateField(
+    @Param("id") id: string,
+    @Body() updateFieldDto: UpdateFieldDto,
+  ) {
+    try {
+      const updatedField = await this.fieldService.updateField(
+        id,
+        updateFieldDto,
+      );
+      return { data: updatedField };
+    } catch (error) {
+      console.error("Error updating field:", error);
+
+      if (error instanceof NotFoundException) {
+        return { error: "Field not found" };
+      }
+
+      return { error: "An error occurred while updating the field" };
     }
   }
 

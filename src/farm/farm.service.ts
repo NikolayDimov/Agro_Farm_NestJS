@@ -147,7 +147,7 @@ export class FarmService {
         farm.country = newCountry;
       }
 
-      // Update other fields if provided
+      // Update farm
       if (updateFarmDto.name) {
         farm.name = updateFarmDto.name;
       }
