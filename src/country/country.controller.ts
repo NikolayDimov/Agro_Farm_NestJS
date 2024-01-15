@@ -13,12 +13,17 @@ import { AuthGuard } from "../auth/auth.guard";
 import { CountryService } from "./country.service";
 import { CreateCountryDto } from "./dtos/create-country.dto";
 import { UpdateCountryDto } from "./dtos/update-country.dto";
+import { Roles } from "../auth/decorator/roles.decorator";
+import { UserRole } from "src/auth/dtos/role.enum";
+import { RolesGuard } from "src/auth/roles.guard";
 
 @Controller("country")
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class CountryController {
   constructor(private readonly countryService: CountryService) {}
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
+  @UseGuards(RolesGuard)
   @Post("/createCountry")
   async createCountry(@Body() createCountryDto: CreateCountryDto) {
     try {
@@ -52,6 +57,8 @@ export class CountryController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
+  @UseGuards(RolesGuard)
   @Patch(":id")
   async updateCountry(
     @Param("id") id: string,
@@ -65,6 +72,8 @@ export class CountryController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
+  @UseGuards(RolesGuard)
   @Delete(":id")
   async deleteCountryById(
     @Param("id") id: string,
@@ -74,6 +83,26 @@ export class CountryController {
     } catch (error) {
       console.error("Error deleting country:", error);
       throw new NotFoundException("Failed to delete country");
+    }
+  }
+
+  // For permanent delete accessible only by OWNER
+  @Roles(UserRole.OWNER)
+  @Delete(":id/permanent")
+  async permanentlyDeleteCountryByIdForOwner(
+    @Param("id") id: string,
+  ): Promise<{ id: string; name: string; message: string }> {
+    try {
+      // Assuming you have the user's role available in the request or somewhere
+      const userRole = UserRole.OWNER; // Replace this with your actual logic to get the user's role
+
+      return this.countryService.permanentlyDeleteCountryByIdForOwner(
+        id,
+        userRole,
+      );
+    } catch (error) {
+      console.error("Error permanently deleting country:", error);
+      throw new NotFoundException("Failed to permanently delete country");
     }
   }
 }

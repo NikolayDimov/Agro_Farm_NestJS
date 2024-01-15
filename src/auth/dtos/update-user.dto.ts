@@ -1,6 +1,6 @@
 import { IsEmail, IsEnum, IsString, IsNotEmpty } from "class-validator";
 import { CreateUserDto } from "./create-user.dto";
-import { UserRole } from "./enum";
+import { UserRole } from "./role.enum";
 
 export class UpdateUserDto extends CreateUserDto {
   @IsString()

@@ -4,6 +4,8 @@ import {
   BadRequestException,
   NotFoundException,
 } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import { randomBytes, scrypt as _scrypt } from "crypto";
@@ -11,12 +13,15 @@ import { promisify } from "util";
 import { CreateUserDto } from "./dtos/create-user.dto";
 const scrypt = promisify(_scrypt);
 import { SignInDto } from "./dtos/signIn.dto";
+//import { UserRole } from "./dtos/role.enum";
+import { User } from "../users/user.entity";
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    @InjectRepository(User) private userRepositoty: Repository<User>,
   ) {}
 
   async signUp(user: CreateUserDto) {
@@ -68,7 +73,11 @@ export class AuthService {
         throw new UnauthorizedException("Invalid password");
       }
 
-      const payload = { sub: existingUser.id, username: existingUser.username };
+      const payload = {
+        sub: existingUser.id,
+        username: existingUser.username,
+        role: existingUser.role,
+      };
 
       return {
         access_token: await this.jwtService.signAsync(payload),
@@ -77,4 +86,18 @@ export class AuthService {
       throw new BadRequestException("Error user login");
     }
   }
+
+  // async updateUserRole(uuid: string, newRole: UserRole): Promise<User> {
+  //   const user = await this.userRepositoty.findOne({ where: { uuid } }); // Pass 'where' object
+
+  //   if (!user) {
+  //     throw new NotFoundException(`User with UUID ${uuid} not found`);
+  //   }
+
+  //   user.role = newRole;
+
+  //   await this.userRepositoty.save(user);
+
+  //   return user;
+  // }
 }

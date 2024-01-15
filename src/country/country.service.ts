@@ -9,6 +9,8 @@ import { validate } from "class-validator";
 import { Country } from "./country.entity";
 import { CreateCountryDto } from "./dtos/create-country.dto";
 import { UpdateCountryDto } from "./dtos/update-country.dto";
+import { EntityNotFoundError } from "typeorm/error/EntityNotFoundError";
+import { UserRole } from "../auth/dtos/role.enum";
 
 @Injectable()
 export class CountryService {
@@ -94,25 +96,95 @@ export class CountryService {
     }
   }
 
+  // async deleteCountryById(
+  //   id: string,
+  // ): Promise<{ id: string; name: string; message: string }> {
+  //   try {
+  //     // findOneOrFail expects an object with a "where" property
+  //     const country = await this.countryRepository.findOneOrFail({
+  //       where: { id },
+  //     });
+  //     const { name } = country;
+  //     // Soft delete by setting the "deleted" property
+  //     country.deleted = new Date();
+  //     await this.countryRepository.save(country);
+  //     return {
+  //       id,
+  //       name,
+  //       message: `Successfully deleted Country with id ${id} and name ${name}`,
+  //     };
+  //   } catch (error) {
+  //     throw new NotFoundException(`Country with id ${id} not found`);
+  //   }
+  // }
+
   async deleteCountryById(
     id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
-      // findOneOrFail expects an object with a "where" property
-      const country = await this.countryRepository.findOneOrFail({
+      // Check if the country exists
+      const existingCountry = await this.countryRepository.findOne({
         where: { id },
       });
-      const { name } = country;
-      // Soft delete by setting the "deleted" property
-      country.deleted = new Date();
-      await this.countryRepository.save(country);
+
+      if (!existingCountry) {
+        throw new NotFoundException(`Country with id ${id} not found`);
+      }
+
+      // Soft delete using the softDelete method
+      await this.countryRepository.softDelete(id);
+
       return {
         id,
-        name,
-        message: `Successfully deleted Country with id ${id} and name ${name}`,
+        name: existingCountry.name,
+        message: `Successfully soft-deleted Country with id ${id} and name ${existingCountry.name}`,
       };
     } catch (error) {
+      // Handle EntityNotFoundError specifically
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException(`Country with id ${id} not found`);
+      }
+
       throw new NotFoundException(`Country with id ${id} not found`);
+    }
+  }
+
+  async permanentlyDeleteCountryByIdForOwner(
+    id: string,
+    userRole: UserRole, // Assuming you pass the user's role to the service method
+  ): Promise<{ id: string; name: string; message: string }> {
+    try {
+      // Check if the country exists
+      const existingCountry = await this.countryRepository.findOne({
+        where: { id },
+      });
+
+      if (!existingCountry) {
+        throw new NotFoundException(`Country with id ${id} not found`);
+      }
+
+      // Check if the user has the necessary role (OWNER) to perform the permanent delete
+      if (userRole !== UserRole.OWNER) {
+        throw new NotFoundException("User does not have the required role");
+      }
+
+      // Perform the permanent delete
+      await this.countryRepository.remove(existingCountry);
+
+      return {
+        id,
+        name: existingCountry.name,
+        message: `Successfully permanently deleted Country with id ${id} and name ${existingCountry.name}`,
+      };
+    } catch (error) {
+      // Handle EntityNotFoundError specifically
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException(`Country with id ${id} not found`);
+      }
+
+      throw new NotFoundException(
+        `Failed to permanently delete country with id ${id}`,
+      );
     }
   }
 }

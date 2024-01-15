@@ -9,12 +9,12 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from "typeorm";
-import { UserRole } from "../auth/dtos/enum";
+import { UserRole } from "../auth/dtos/role.enum";
 
 @Entity({ name: "user", schema: "public" })
 export class User {
   @PrimaryGeneratedColumn("uuid")
-  id: number;
+  id: string;
 
   @Column()
   username: string;
