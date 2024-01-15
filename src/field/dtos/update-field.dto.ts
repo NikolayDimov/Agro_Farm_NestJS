@@ -11,7 +11,7 @@ export class UpdateFieldDto {
 
   @IsNotEmpty()
   @IsObject({ message: "Polygons must be a valid GeoJSON object" })
-  polygons: MultiPolygon;
+  boundary: MultiPolygon;
 
   @IsNotEmpty()
   @IsString()

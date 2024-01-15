@@ -10,7 +10,7 @@ export class FieldDto {
   name: string;
 
   @Expose()
-  polygons: string;
+  boundary: string;
 
   @Expose()
   @Type(() => FarmDto)

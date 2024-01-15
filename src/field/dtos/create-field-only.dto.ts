@@ -11,5 +11,5 @@ export class CreateFieldOnlyDto {
 
   @IsNotEmpty({ message: "Polygons cannot be empty" })
   @IsObject({ message: "Polygons must be a valid GeoJSON object" })
-  polygons: MultiPolygon;
+  boundary: MultiPolygon;
 }

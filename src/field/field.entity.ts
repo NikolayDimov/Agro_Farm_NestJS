@@ -23,13 +23,13 @@ export class Field {
   name: string;
 
   @Column({ type: "jsonb", nullable: false })
-  polygons: MultiPolygon;
+  boundary: MultiPolygon;
 
   // Connect to the user - not for our project
   // @ManyToOne(() => User, (user) => user.farms)
   // user: User;
 
-  @ManyToOne(() => Farm, (farm) => farm.fields)
+  @ManyToOne(() => Farm, (farm) => farm.fields, { nullable: true })
   @JoinColumn({ name: "farm_id" })
   farm: Farm;
 

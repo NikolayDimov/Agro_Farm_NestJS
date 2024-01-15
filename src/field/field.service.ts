@@ -17,11 +17,11 @@ export class FieldService {
   async createFieldOnly(
     createFieldOnlyDto: CreateFieldOnlyDto,
   ): Promise<Field> {
-    const { name, polygons } = createFieldOnlyDto;
+    const { name, boundary } = createFieldOnlyDto;
 
     const newField = this.fieldRepository.create({
       name,
-      polygons,
+      boundary,
     });
 
     return this.fieldRepository.save(newField);
@@ -29,7 +29,7 @@ export class FieldService {
 
   async createFieldWithSoil(createFieldDto: CreateFieldDto): Promise<Field> {
     try {
-      const { name, polygons, soilName } = createFieldDto;
+      const { name, boundary, soilName } = createFieldDto;
 
       // Check if the soil exists
       let soil = await this.soilRepository.findOne({
@@ -45,7 +45,7 @@ export class FieldService {
       // Create the field and associate it with the soil
       const field = this.fieldRepository.create({
         name,
-        polygons,
+        boundary,
         soil,
       });
 
@@ -64,7 +64,7 @@ export class FieldService {
     return {
       id: field.id,
       name: field.name,
-      polygons: field.polygons,
+      boundary: field.boundary,
       created: field.created,
       updated: field.updated,
       deleted: field.deleted,
@@ -151,9 +151,9 @@ export class FieldService {
       if (updateFieldDto.name) {
         field.name = updateFieldDto.name;
       }
-      // Update the fields'polygons
-      if (updateFieldDto.polygons) {
-        field.polygons = updateFieldDto.polygons;
+      // Update the fields'boundary
+      if (updateFieldDto.boundary) {
+        field.boundary = updateFieldDto.boundary;
       }
 
       // Save the updated field
