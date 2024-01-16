@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { EntityNotFoundError, Repository } from "typeorm";
 import { Farm } from "./farm.entity";
 import { CreateFarmDto } from "./dtos/create-farm.dto";
 import { CreateFarmOnlyDto } from "./dtos/create-farm-only.dto";
 import { UpdateFarmDto } from "./dtos/update-farm.dto";
 import { Country } from "../country/country.entity";
+import { UserRole } from "../auth/dtos/role.enum";
 // import { Field } from "../field/field.entity";
 
 @Injectable()
@@ -26,10 +27,7 @@ export class FarmService {
 
   async createFarmWithCountry(createFarmDto: CreateFarmDto): Promise<Farm> {
     const { name, countryName } = createFarmDto;
-    // Check if the country exists
-    // let country = await this.countryRepository.findOne({
-    //   where: { name: countryName },
-    // });
+
     let country = await this.countryRepository.findOneBy({
       name: countryName,
     });
@@ -146,7 +144,6 @@ export class FarmService {
     id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
-      // findOneOrFail expects an object with a "where" property
       const farm = await this.farmRepository.findOneBy({ id });
 
       const { name } = farm;
@@ -163,34 +160,69 @@ export class FarmService {
     }
   }
 
-  //  The function must delete farm and related country - now Delete Farm only, not Country
-  // Function not work
+  async permanentlyDeletefarmByIdForOwner(
+    id: string,
+    userRole: UserRole,
+  ): Promise<{ id: string; name: string; message: string }> {
+    try {
+      const existingFarm = await this.farmRepository.findOneBy({ id });
 
-  // async deleteFarmAndCountryById(farmId: string): Promise<void> {
-  //   try {
-  //     // Find the farm and its associated country
-  //     const farm = await this.farmRepository.findOneOrFail({
-  //       where: { id: farmId },
-  //       relations: ["country"],
-  //     });
+      if (!existingFarm) {
+        throw new NotFoundException(`Farm with id ${id} not found`);
+      }
 
-  //     if (!farm) {
-  //       throw new NotFoundException(`Farm with id ${farmId} not found`);
-  //     }
+      // Check if the user has the necessary role (OWNER) to perform the permanent delete
+      if (userRole !== UserRole.OWNER) {
+        throw new NotFoundException("User does not have the required role");
+      }
 
-  //     const country = farm.country;
+      // Perform the permanent delete
+      await this.farmRepository.remove(existingFarm);
 
-  //     // Soft delete the farm
-  //     farm.deleted = new Date();
-  //     await this.farmRepository.save(farm);
+      return {
+        id,
+        name: existingFarm.name,
+        message: `Successfully permanently deleted Farm with id ${id} and name ${existingFarm.name}`,
+      };
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException(`farm with id ${id} not found`);
+      }
 
-  //     // Soft delete the country
-  //     if (country) {
-  //       country.deleted = new Date();
-  //       await this.countryRepository.save(country);
-  //     }
-  //   } catch (error) {
-  //     throw new NotFoundException(`Farm or Country not found for the given ID`);
-  //   }
-  // }
+      throw new NotFoundException(
+        `Failed to permanently delete farm with id ${id}`,
+      );
+    }
+  }
 }
+
+//  The function must delete farm and related country - now Delete Farm only, not Country
+// Function not work
+
+// async deleteFarmAndCountryById(farmId: string): Promise<void> {
+//   try {
+//     // Find the farm and its associated country
+//     const farm = await this.farmRepository.findOneOrFail({
+//       where: { id: farmId },
+//       relations: ["country"],
+//     });
+
+//     if (!farm) {
+//       throw new NotFoundException(`Farm with id ${farmId} not found`);
+//     }
+
+//     const country = farm.country;
+
+//     // Soft delete the farm
+//     farm.deleted = new Date();
+//     await this.farmRepository.save(farm);
+
+//     // Soft delete the country
+//     if (country) {
+//       country.deleted = new Date();
+//       await this.countryRepository.save(country);
+//     }
+//   } catch (error) {
+//     throw new NotFoundException(`Farm or Country not found for the given ID`);
+//   }
+// }

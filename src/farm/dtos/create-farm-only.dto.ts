@@ -1,4 +1,4 @@
-import { IsLatLong, IsNotEmpty, IsString, Matches } from "class-validator";
+import { IsNotEmpty, IsString, Matches } from "class-validator";
 
 export class CreateFarmOnlyDto {
   @IsNotEmpty({ message: "Name cannot be empty" })
@@ -8,6 +8,6 @@ export class CreateFarmOnlyDto {
   })
   name: string;
 
-  @IsLatLong({ message: "Name cannot be empty" })
-  location: string;
+  // @IsLatLong({ message: "Name cannot be empty" })
+  // location: string;
 }

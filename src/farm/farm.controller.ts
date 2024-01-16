@@ -119,11 +119,26 @@ export class FarmController {
     }
   }
 
-  //  The function must delete farm and related country - now Delete Farm only, not Country
-  // Function not work
+  @Roles(UserRole.OWNER)
+  @Delete(":id/permanent")
+  async permanentlyDeletefarmByIdForOwner(
+    @Param("id") id: string,
+  ): Promise<{ id: string; name: string; message: string }> {
+    try {
+      const userRole = UserRole.OWNER;
 
-  // @Delete(":id")
-  // async deleteFarmAndCountryById(@Param("id") id: string): Promise<void> {
-  //   await this.farmService.deleteFarmAndCountryById(id);
-  // }
+      return this.farmService.permanentlyDeletefarmByIdForOwner(id, userRole);
+    } catch (error) {
+      console.error("Error permanently deleting farm:", error);
+      throw new NotFoundException("Failed to permanently delete farm");
+    }
+  }
 }
+
+//  The function must delete farm and related country - now Delete Farm only, not Country
+// Function not work
+
+// @Delete(":id")
+// async deleteFarmAndCountryById(@Param("id") id: string): Promise<void> {
+//   await this.farmService.deleteFarmAndCountryById(id);
+// }
