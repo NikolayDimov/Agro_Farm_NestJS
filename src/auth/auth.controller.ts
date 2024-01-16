@@ -7,16 +7,15 @@ import {
   UseGuards,
   Get,
   Request,
-  // ParseUUIDPipe,
-  // Patch,
-  // Param,
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { AuthGuard } from "./auth.guard";
 import { CreateUserDto } from "./dtos/create-user.dto";
 import { SignInDto } from "./dtos/signIn.dto";
-// import { User } from "../users/user.entity";
-// import { UserRole } from "./dtos/role.enum";
+import { UpdateUserRoleDto } from "./dtos/update-user-role.dto";
+import { Roles } from "./decorator/roles.decorator";
+import { UserRole } from "./dtos/role.enum";
+import { RolesGuard } from "./roles.guard";
 
 @Controller("auth")
 // @Serialize(UserDto)  -> not used
@@ -41,16 +40,12 @@ export class AuthController {
     return req.user;
   }
 
-  // @Patch("/:uuid")
-  // async updateUser(
-  //   @Param("uuid", new ParseUUIDPipe()) uuid: string,
-  // ): Promise<User> {
-  //   const newRole = await this.authService.updateUserRole(
-  //     uuid,
-  //     UserRole.OPERATOR,
-  //   ); // Change UserRole.OPERATOR to the desired new role
-  //   return newRole;
-  // }
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.OWNER)
+  @Post("/updateUserRole")
+  async updateUserRole(@Body() updateUserRoleDto: UpdateUserRoleDto) {
+    return this.authService.updateUserRole(updateUserRoleDto);
+  }
 }
 
 // LOGOUT NOT WORK IN BACK-END

@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   BadRequestException,
   NotFoundException,
+  // ExecutionContext,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -13,15 +14,16 @@ import { promisify } from "util";
 import { CreateUserDto } from "./dtos/create-user.dto";
 const scrypt = promisify(_scrypt);
 import { SignInDto } from "./dtos/signIn.dto";
-//import { UserRole } from "./dtos/role.enum";
 import { User } from "../users/user.entity";
+import { UpdateUserRoleDto } from "./dtos/update-user-role.dto";
+//import { UserRole } from "./dtos/role.enum";
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    @InjectRepository(User) private userRepositoty: Repository<User>,
+    @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
   async signUp(user: CreateUserDto) {
@@ -87,17 +89,20 @@ export class AuthService {
     }
   }
 
-  // async updateUserRole(uuid: string, newRole: UserRole): Promise<User> {
-  //   const user = await this.userRepositoty.findOne({ where: { uuid } }); // Pass 'where' object
+  async updateUserRole(updateUserRoleDto: UpdateUserRoleDto): Promise<User> {
+    const { userId, newRole } = updateUserRoleDto;
 
-  //   if (!user) {
-  //     throw new NotFoundException(`User with UUID ${uuid} not found`);
-  //   }
+    const existingUser = await this.userRepository.findOne({
+      where: { id: userId },
+    });
 
-  //   user.role = newRole;
+    if (!existingUser) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
 
-  //   await this.userRepositoty.save(user);
+    existingUser.role = newRole;
+    await this.userRepository.save(existingUser);
 
-  //   return user;
-  // }
+    return existingUser;
+  }
 }
