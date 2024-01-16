@@ -121,4 +121,19 @@ export class FieldController {
       throw new NotFoundException("Failed to delete field");
     }
   }
+
+  @Roles(UserRole.OWNER)
+  @Delete(":id/permanent")
+  async permanentlyDeleteFieldByIdForOwner(
+    @Param("id") id: string,
+  ): Promise<{ id: string; name: string; message: string }> {
+    try {
+      const userRole = UserRole.OWNER;
+
+      return this.fieldService.permanentlyDeleteFieldByIdForOwner(id, userRole);
+    } catch (error) {
+      console.error("Error permanently deleting country:", error);
+      throw new NotFoundException("Failed to permanently delete country");
+    }
+  }
 }

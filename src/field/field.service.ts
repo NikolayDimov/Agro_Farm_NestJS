@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { EntityNotFoundError, Repository } from "typeorm";
 import { Field } from "./field.entity";
 import { CreateFieldDto } from "./dtos/create-field.dto";
 import { CreateFieldOnlyDto } from "./dtos/create-field-only.dto";
 import { UpdateFieldDto } from "./dtos/update-field.dto";
 import { Soil } from "../soil/soil.entity";
+import { UserRole } from "../auth/dtos/role.enum";
 
 @Injectable()
 export class FieldService {
@@ -190,6 +191,41 @@ export class FieldService {
       };
     } catch (error) {
       throw new NotFoundException(`Field with id ${id} not found`);
+    }
+  }
+
+  async permanentlyDeleteFieldByIdForOwner(
+    id: string,
+    userRole: UserRole,
+  ): Promise<{ id: string; name: string; message: string }> {
+    try {
+      const existingField = await this.fieldRepository.findOneBy({ id });
+
+      if (!existingField) {
+        throw new NotFoundException(`Field with id ${id} not found`);
+      }
+
+      // Check if the user has the necessary role (OWNER) to perform the permanent delete
+      if (userRole !== UserRole.OWNER) {
+        throw new NotFoundException("User does not have the required role");
+      }
+
+      // Perform the permanent delete
+      await this.fieldRepository.remove(existingField);
+
+      return {
+        id,
+        name: existingField.name,
+        message: `Successfully permanently deleted Field with id ${id} and name ${existingField.name}`,
+      };
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException(`Field with id ${id} not found`);
+      }
+
+      throw new NotFoundException(
+        `Failed to permanently delete Field with id ${id}`,
+      );
     }
   }
 }
