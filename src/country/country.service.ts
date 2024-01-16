@@ -83,7 +83,16 @@ export class CountryService {
     updateCountryDto: UpdateCountryDto,
   ): Promise<Country> {
     try {
-      const country = await this.findById(id);
+      // First Option for find
+      //const country = await this.findById(id);
+
+      // Second Option for find
+      // const country = await this.countryRepository.findOne({
+      //   where: { id },
+      // });
+
+      // Third Option for find
+      const country = await this.countryRepository.findOneBy({ id });
 
       if (updateCountryDto.name) {
         country.name = updateCountryDto.name;
@@ -96,36 +105,11 @@ export class CountryService {
     }
   }
 
-  // async deleteCountryById(
-  //   id: string,
-  // ): Promise<{ id: string; name: string; message: string }> {
-  //   try {
-  //     // findOneOrFail expects an object with a "where" property
-  //     const country = await this.countryRepository.findOneOrFail({
-  //       where: { id },
-  //     });
-  //     const { name } = country;
-  //     // Soft delete by setting the "deleted" property
-  //     country.deleted = new Date();
-  //     await this.countryRepository.save(country);
-  //     return {
-  //       id,
-  //       name,
-  //       message: `Successfully deleted Country with id ${id} and name ${name}`,
-  //     };
-  //   } catch (error) {
-  //     throw new NotFoundException(`Country with id ${id} not found`);
-  //   }
-  // }
-
   async deleteCountryById(
     id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
-      // Check if the country exists
-      const existingCountry = await this.countryRepository.findOne({
-        where: { id },
-      });
+      const existingCountry = await this.countryRepository.findOneBy({ id });
 
       if (!existingCountry) {
         throw new NotFoundException(`Country with id ${id} not found`);
@@ -154,10 +138,7 @@ export class CountryService {
     userRole: UserRole, // Assuming you pass the user's role to the service method
   ): Promise<{ id: string; name: string; message: string }> {
     try {
-      // Check if the country exists
-      const existingCountry = await this.countryRepository.findOne({
-        where: { id },
-      });
+      const existingCountry = await this.countryRepository.findOneBy({ id });
 
       if (!existingCountry) {
         throw new NotFoundException(`Country with id ${id} not found`);

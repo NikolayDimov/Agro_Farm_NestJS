@@ -71,7 +71,7 @@ export class SoilService {
 
   async updateSoil(id: string, updateSoilDto: UpdateSoilDto): Promise<Soil> {
     try {
-      const soil = await this.findById(id);
+      const soil = await this.soilRepository.findOneBy({ id });
 
       if (updateSoilDto.name) {
         soil.name = updateSoilDto.name;
@@ -88,8 +88,7 @@ export class SoilService {
     id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
-      // findOneOrFail expects an object with a "where" property
-      const soil = await this.soilRepository.findOneOrFail({ where: { id } });
+      const soil = await this.soilRepository.findOneBy({ id });
 
       const { name } = soil;
       // Soft delete by setting the "deleted" property

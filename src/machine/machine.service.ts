@@ -78,7 +78,7 @@ export class MachineService {
     updateMachineDto: UpdateMachineDto,
   ): Promise<Machine> {
     try {
-      const machine = await this.findById(id);
+      const machine = await this.machineRepository.findOneBy({ id });
 
       if (
         updateMachineDto.brand ||
@@ -113,10 +113,7 @@ export class MachineService {
     message: string;
   }> {
     try {
-      // findOneOrFail expects an object with a "where" property
-      const machine = await this.machineRepository.findOneOrFail({
-        where: { id },
-      });
+      const machine = await this.machineRepository.findOneBy({ id });
 
       const { brand, model, registerNumber } = machine;
       // Soft delete by setting the "deleted" property

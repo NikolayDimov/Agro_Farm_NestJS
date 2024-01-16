@@ -26,19 +26,19 @@ export class FarmService {
 
   async createFarmWithCountry(createFarmDto: CreateFarmDto): Promise<Farm> {
     const { name, countryName } = createFarmDto;
-
     // Check if the country exists
-    let country = await this.countryRepository.findOne({
-      where: { name: countryName },
+    // let country = await this.countryRepository.findOne({
+    //   where: { name: countryName },
+    // });
+    let country = await this.countryRepository.findOneBy({
+      name: countryName,
     });
 
-    // If the country doesn't exist, create it
     if (!country) {
       country = await this.countryRepository.create({ name: countryName });
       await this.countryRepository.save(country);
     }
 
-    // Create the farm and associate it with the country
     const farm = this.farmRepository.create({
       name,
       country,
@@ -46,31 +46,8 @@ export class FarmService {
 
     await this.farmRepository.save(farm);
 
-    // Return the created farm
     return farm;
   }
-
-  // --- First function with Typeorm request ---
-  // async findAll(): Promise<Farm[]> {
-  //   try {
-  //     const farms = await this.farmRepository
-  //       .createQueryBuilder("farm")
-  //       .leftJoinAndSelect("farm.country", "country")
-  //       .andWhere("farm.deleted IS NULL")
-  //       .getMany();
-
-  //     if (!farms.length) {
-  //       throw new NotFoundException("No farms found");
-  //     }
-
-  //     console.log("Fetched Farms:", farms);
-
-  //     return farms;
-  //   } catch (error) {
-  //     console.error("Error fetching farms:", error);
-  //     throw error;
-  //   }
-  // }
 
   // transformFarm and transformCountry -- use for findAllWithCountries and findById
   private transformFarm(farm: Farm) {
@@ -123,7 +100,7 @@ export class FarmService {
   async updateFarm(id: string, updateFarmDto: UpdateFarmDto): Promise<Farm> {
     try {
       // Find the farm by ID
-      const farm = await this.farmRepository.findOneOrFail({
+      const farm = await this.farmRepository.findOne({
         where: { id },
         relations: ["country"],
       });
@@ -131,9 +108,7 @@ export class FarmService {
       // If countryName is provided, update the farm's country
       if (updateFarmDto.countryName) {
         // Check if the new country exists
-        let newCountry = await this.countryRepository.findOne({
-          where: { name: updateFarmDto.countryName },
-        });
+        let newCountry = await this.countryRepository.findOneBy({ id });
 
         // If the new country doesn't exist, create it
         if (!newCountry) {
@@ -172,7 +147,7 @@ export class FarmService {
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       // findOneOrFail expects an object with a "where" property
-      const farm = await this.farmRepository.findOneOrFail({ where: { id } });
+      const farm = await this.farmRepository.findOneBy({ id });
 
       const { name } = farm;
       // Soft delete by setting the "deleted" property

@@ -17,6 +17,13 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     // console.log("request:", request);
 
+    const isPublic =
+      request.url.includes("signin") || request.url.includes("signup");
+
+    if (isPublic) {
+      return true;
+    }
+
     const token = this.extractTokenFromHeader(request);
     // console.log("auth-guard-token:", token);
     if (!token) {

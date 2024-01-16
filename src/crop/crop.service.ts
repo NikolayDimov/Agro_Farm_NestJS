@@ -78,7 +78,7 @@ export class CropService {
 
   async updateCrop(id: string, updateCropDto: UpdateCropDto): Promise<Crop> {
     try {
-      const crop = await this.findById(id);
+      const crop = await this.cropRepository.findOneBy({ id });
 
       if (updateCropDto.name) {
         crop.name = updateCropDto.name;
@@ -96,9 +96,8 @@ export class CropService {
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       // findOneOrFail expects an object with a "where" property
-      const crop = await this.cropRepository.findOneOrFail({
-        where: { id },
-      });
+      const crop = await this.cropRepository.findOneBy({ id });
+
       const { name } = crop;
       // Soft delete by setting the "deleted" property
       crop.deleted = new Date();

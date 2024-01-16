@@ -23,7 +23,6 @@ export class CountryController {
   constructor(private readonly countryService: CountryService) {}
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
-  @UseGuards(RolesGuard)
   @Post("/createCountry")
   async createCountry(@Body() createCountryDto: CreateCountryDto) {
     try {
@@ -58,7 +57,6 @@ export class CountryController {
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
-  @UseGuards(RolesGuard)
   @Patch(":id")
   async updateCountry(
     @Param("id") id: string,
@@ -73,7 +71,6 @@ export class CountryController {
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
-  @UseGuards(RolesGuard)
   @Delete(":id")
   async deleteCountryById(
     @Param("id") id: string,

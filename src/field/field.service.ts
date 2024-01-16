@@ -123,7 +123,7 @@ export class FieldService {
     try {
       // console.log("Received ID:", id);
       // Find the field by ID
-      const field = await this.fieldRepository.findOneOrFail({
+      const field = await this.fieldRepository.findOne({
         where: { id },
         relations: ["soil"],
       });
@@ -176,8 +176,7 @@ export class FieldService {
     id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
-      // findOneOrFail expects an object with a "where" property
-      const field = await this.fieldRepository.findOneOrFail({ where: { id } });
+      const field = await this.fieldRepository.findOneBy({ id });
 
       const { name } = field;
 
