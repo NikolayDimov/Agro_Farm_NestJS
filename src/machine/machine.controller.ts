@@ -89,6 +89,28 @@ export class MachineController {
       throw new NotFoundException("Failed to delete machine");
     }
   }
+
+  @Roles(UserRole.OWNER)
+  @Delete(":id/permanent")
+  async permanentlyDeleteMachineByIdForOwner(@Param("id") id: string): Promise<{
+    id: string;
+    brand: string;
+    model: string;
+    registerNumber: string;
+    message: string;
+  }> {
+    try {
+      const userRole = UserRole.OWNER;
+
+      return this.machineService.permanentlyDeleteMachineByIdForOwner(
+        id,
+        userRole,
+      );
+    } catch (error) {
+      console.error("Error permanently deleting machine:", error);
+      throw new NotFoundException("Failed to permanently delete machine");
+    }
+  }
 }
 
 // When you use return with a promise inside an asynchronous function, the function automatically returns a promise that will be resolved with the value returned from the asynchronous operation. Here's the corrected explanation:

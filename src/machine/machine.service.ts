@@ -4,11 +4,12 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { EntityNotFoundError, Repository } from "typeorm";
 import { validate } from "class-validator";
 import { Machine } from "./machine.entity";
 import { CreateMachineDto } from "./dtos/create-machine.dto";
 import { UpdateMachineDto } from "./dtos/update-machine.dto";
+import { UserRole } from "../auth/dtos/role.enum";
 
 @Injectable()
 export class MachineService {
@@ -128,6 +129,52 @@ export class MachineService {
       };
     } catch (error) {
       throw new NotFoundException(`Machine with id ${id} not found`);
+    }
+  }
+
+  async permanentlyDeleteMachineByIdForOwner(
+    id: string,
+    userRole: UserRole,
+  ): Promise<{
+    id: string;
+    brand: string;
+    model: string;
+    registerNumber: string;
+    message: string;
+  }> {
+    try {
+      const existingMachine = await this.machineRepository.findOneBy({ id });
+      const { brand, model, registerNumber } = existingMachine;
+      // console.log("Found machine:", existingMachine);
+
+      if (!existingMachine) {
+        throw new NotFoundException(`Machine with id ${id} not found`);
+      }
+
+      // Check if the user has the necessary role (OWNER) to perform the permanent delete
+      if (userRole !== UserRole.OWNER) {
+        throw new NotFoundException("User does not have the required role");
+      }
+
+      // Perform the permanent delete
+      await this.machineRepository.remove(existingMachine);
+
+      return {
+        id,
+        brand,
+        model,
+        registerNumber,
+        message: `Successfully permanently deleted Machine with id ${id} and name ${brand}`,
+      };
+    } catch (error) {
+      console.error("Error during deletion:", error);
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException(`Machine with id ${id} not found`);
+      }
+
+      throw new NotFoundException(
+        `Failed to permanently delete machine with id ${id}`,
+      );
     }
   }
 }
