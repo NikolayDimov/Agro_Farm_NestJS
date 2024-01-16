@@ -9,7 +9,7 @@ import {
   Param,
   NotFoundException,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
+import { AuthGuard } from "../auth/guards/auth.guard";
 import { CreateSoilDto } from "./dtos/create-soil.dto";
 import { SoilService } from "./soil.service";
 import { UpdateSoilDto } from "./dtos/update-soil.dto";

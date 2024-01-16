@@ -9,16 +9,15 @@ import {
   Param,
   NotFoundException,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
 import { CountryService } from "./country.service";
 import { CreateCountryDto } from "./dtos/create-country.dto";
 import { UpdateCountryDto } from "./dtos/update-country.dto";
 import { Roles } from "../auth/decorator/roles.decorator";
-import { UserRole } from "src/auth/dtos/role.enum";
-import { RolesGuard } from "src/auth/roles.guard";
+import { UserRole } from "../auth/dtos/role.enum";
+import { RolesGuard } from "../auth/guards/roles.guard";
 
 @Controller("country")
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(RolesGuard)
 export class CountryController {
   constructor(private readonly countryService: CountryService) {}
 
@@ -90,8 +89,7 @@ export class CountryController {
     @Param("id") id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
-      // Assuming you have the user's role available in the request or somewhere
-      const userRole = UserRole.OWNER; // Replace this with your actual logic to get the user's role
+      const userRole = UserRole.OWNER;
 
       return this.countryService.permanentlyDeleteCountryByIdForOwner(
         id,

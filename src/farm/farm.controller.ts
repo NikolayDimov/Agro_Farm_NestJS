@@ -9,7 +9,7 @@ import {
   Delete,
   NotFoundException,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
+import { AuthGuard } from "../auth/guards/auth.guard";
 import { CreateFarmDto } from "./dtos/create-farm.dto";
 import { CreateFarmOnlyDto } from "./dtos/create-farm-only.dto";
 import { UpdateFarmDto } from "./dtos/update-farm.dto";

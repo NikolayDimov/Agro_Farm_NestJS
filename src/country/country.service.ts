@@ -124,7 +124,6 @@ export class CountryService {
         message: `Successfully soft-deleted Country with id ${id} and name ${existingCountry.name}`,
       };
     } catch (error) {
-      // Handle EntityNotFoundError specifically
       if (error instanceof EntityNotFoundError) {
         throw new NotFoundException(`Country with id ${id} not found`);
       }

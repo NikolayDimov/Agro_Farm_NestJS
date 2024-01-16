@@ -9,7 +9,7 @@ import {
   Param,
   Delete,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
+import { AuthGuard } from "../auth/guards/auth.guard";
 import { CreateFieldDto } from "./dtos/create-field.dto";
 import { CreateFieldOnlyDto } from "./dtos/create-field-only.dto";
 import { UpdateFieldDto } from "./dtos/update-field.dto";

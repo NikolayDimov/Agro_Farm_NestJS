@@ -6,21 +6,27 @@ import { UserRole } from "../auth/dtos/role.enum";
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectRepository(User) private repo: Repository<User>) {}
+  constructor(
+    @InjectRepository(User) private userRepository: Repository<User>,
+  ) {}
 
   create(username: string, email: string, password: string, role: UserRole) {
-    const user = this.repo.create({ username, email, password, role });
+    const user = this.userRepository.create({
+      username,
+      email,
+      password,
+      role,
+    });
 
-    return this.repo.save(user);
-    // with const user, then return user - Hooks are executed
-    // there is console.log in terminal from user.entity
+    return this.userRepository.save(user);
   }
 
   async findOne(username: string): Promise<User | undefined> {
-    return this.repo.findOne({ where: { username } });
+    // return this.userRepository.findOne({ where: { username } });
+    return await this.userRepository.findOneBy({ username });
   }
 
-  find(username: string) {
-    return this.repo.find({ where: { username } });
+  async find(username: string) {
+    return this.userRepository.find({ where: { username } });
   }
 }

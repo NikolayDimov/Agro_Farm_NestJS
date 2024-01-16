@@ -9,13 +9,14 @@ import {
   Request,
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { AuthGuard } from "./auth.guard";
+import { AuthGuard } from "./guards/auth.guard";
 import { CreateUserDto } from "./dtos/create-user.dto";
 import { SignInDto } from "./dtos/signIn.dto";
 import { UpdateUserRoleDto } from "./dtos/update-user-role.dto";
 import { Roles } from "./decorator/roles.decorator";
 import { UserRole } from "./dtos/role.enum";
-import { RolesGuard } from "./roles.guard";
+import { RolesGuard } from "./guards/roles.guard";
+import { Public } from "./decorator/public.decorator";
 
 @Controller("auth")
 // @Serialize(UserDto)  -> not used
@@ -23,11 +24,13 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @HttpCode(HttpStatus.OK)
+  @Public()
   @Post("login")
   signIn(@Body() signInDto: SignInDto) {
     return this.authService.signIn(signInDto);
   }
 
+  @Public()
   @Post("/register")
   async createUser(@Body() user: CreateUserDto) {
     const userCreate = await this.authService.signUp(user); // creating User with authentication

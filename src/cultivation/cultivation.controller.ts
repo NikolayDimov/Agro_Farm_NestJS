@@ -9,7 +9,7 @@ import {
   //Param,
   //Delete,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
+import { AuthGuard } from "../auth/guards/auth.guard";
 import { CreateCultivationDto } from "./dtos/create-cultivation.dto";
 import { CreateCultivationOnlyDto } from "./dtos/create-cultivation-only.dto";
 //import { UpdateCultivationDto } from "./dtos/update-cultivation.dto";

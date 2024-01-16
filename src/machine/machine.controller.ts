@@ -9,7 +9,7 @@ import {
   Param,
   NotFoundException,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/auth.guard";
+import { AuthGuard } from "../auth/guards/auth.guard";
 import { CreateMachineDto } from "./dtos/create-machine.dto";
 import { MachineService } from "./machine.service";
 import { UpdateMachineDto } from "./dtos/update-machine.dto";
