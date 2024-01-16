@@ -9,16 +9,19 @@ import {
   Param,
   NotFoundException,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/guards/auth.guard";
 import { CreateSoilDto } from "./dtos/create-soil.dto";
 import { SoilService } from "./soil.service";
 import { UpdateSoilDto } from "./dtos/update-soil.dto";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { Roles } from "../auth/decorator/roles.decorator";
+import { UserRole } from "../auth/dtos/role.enum";
 
 @Controller("soil")
-@UseGuards(AuthGuard)
+@UseGuards(RolesGuard)
 export class SoilController {
   constructor(private soilService: SoilService) {}
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("/createSoil")
   async createSoil(@Body() createSoilDto: CreateSoilDto) {
     try {
@@ -56,6 +59,7 @@ export class SoilController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateSoil(
     @Param("id") id: string,
@@ -69,6 +73,7 @@ export class SoilController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
   async deleteSoilById(
     @Param("id") id: string,
@@ -78,6 +83,21 @@ export class SoilController {
     } catch (error) {
       console.error("Error deleting soil:", error);
       throw new NotFoundException("Failed to delete soil");
+    }
+  }
+
+  @Roles(UserRole.OWNER)
+  @Delete(":id/permanent")
+  async permanentlyDeleteCountryByIdForOwner(
+    @Param("id") id: string,
+  ): Promise<{ id: string; name: string; message: string }> {
+    try {
+      const userRole = UserRole.OWNER;
+
+      return this.soilService.permanentlyDeleteSoilByIdForOwner(id, userRole);
+    } catch (error) {
+      console.error("Error permanently deleting country:", error);
+      throw new NotFoundException("Failed to permanently delete country");
     }
   }
 }

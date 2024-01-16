@@ -4,11 +4,12 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { EntityNotFoundError, Repository } from "typeorm";
 import { validate } from "class-validator";
 import { Crop } from "./crop.entity";
 import { CreateCropDto } from "./dtos/create-crop.dto";
 import { UpdateCropDto } from "./dtos/update-crop.dto";
+import { UserRole } from "../auth/dtos/role.enum";
 
 @Injectable()
 export class CropService {
@@ -109,6 +110,41 @@ export class CropService {
       };
     } catch (error) {
       throw new NotFoundException(`Crop with id ${id} not found`);
+    }
+  }
+
+  async permanentlyDeleteCropByIdForOwner(
+    id: string,
+    userRole: UserRole,
+  ): Promise<{ id: string; name: string; message: string }> {
+    try {
+      const existingCrop = await this.cropRepository.findOneBy({ id });
+
+      if (!existingCrop) {
+        throw new NotFoundException(`Crop with id ${id} not found`);
+      }
+
+      // Check if the user has the necessary role (OWNER) to perform the permanent delete
+      if (userRole !== UserRole.OWNER) {
+        throw new NotFoundException("User does not have the required role");
+      }
+
+      // Perform the permanent delete
+      await this.cropRepository.remove(existingCrop);
+
+      return {
+        id,
+        name: existingCrop.name,
+        message: `Successfully permanently deleted Crop with id ${id} and name ${existingCrop.name}`,
+      };
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException(`Country with id ${id} not found`);
+      }
+
+      throw new NotFoundException(
+        `Failed to permanently delete country with id ${id}`,
+      );
     }
   }
 }

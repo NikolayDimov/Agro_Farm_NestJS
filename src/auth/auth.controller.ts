@@ -9,7 +9,6 @@ import {
   Request,
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { AuthGuard } from "./guards/auth.guard";
 import { CreateUserDto } from "./dtos/create-user.dto";
 import { SignInDto } from "./dtos/signIn.dto";
 import { UpdateUserRoleDto } from "./dtos/update-user-role.dto";
@@ -37,13 +36,12 @@ export class AuthController {
     return userCreate;
   }
 
-  @UseGuards(AuthGuard)
   @Get("/profile")
   getProfile(@Request() req) {
     return req.user;
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(RolesGuard)
   @Roles(UserRole.OWNER)
   @Post("/updateUserRole")
   async updateUserRole(@Body() updateUserRoleDto: UpdateUserRoleDto) {

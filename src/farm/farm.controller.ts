@@ -9,18 +9,21 @@ import {
   Delete,
   NotFoundException,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/guards/auth.guard";
 import { CreateFarmDto } from "./dtos/create-farm.dto";
 import { CreateFarmOnlyDto } from "./dtos/create-farm-only.dto";
 import { UpdateFarmDto } from "./dtos/update-farm.dto";
 import { FarmService } from "./farm.service";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { Roles } from "../auth/decorator/roles.decorator";
+import { UserRole } from "../auth/dtos/role.enum";
 
 @Controller("farm")
-@UseGuards(AuthGuard)
+@UseGuards(RolesGuard)
 export class FarmController {
   constructor(private farmService: FarmService) {}
 
   // Cteare Farm and must provide existing Country. If there is no Country - can't create Farm
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("/createFarm")
   async createFarm(@Body() createFarmOnlyDto: CreateFarmOnlyDto) {
     try {
@@ -35,6 +38,7 @@ export class FarmController {
   }
 
   // Cteare Farm and create new Country. If there is no Country - create new Country. If there is a Country - select from existing Country
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("createFarmWithCountry")
   async createFarmWithCountry(@Body() createFarmDto: CreateFarmDto) {
     try {
@@ -82,6 +86,7 @@ export class FarmController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateFarm(
     @Param("id") id: string,
@@ -101,6 +106,7 @@ export class FarmController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
   async deleteFarmOnlyById(
     @Param("id") id: string,

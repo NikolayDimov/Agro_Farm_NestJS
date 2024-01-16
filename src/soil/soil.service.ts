@@ -4,11 +4,12 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { EntityNotFoundError, Repository } from "typeorm";
 import { validate } from "class-validator";
 import { Soil } from "./soil.entity";
 import { CreateSoilDto } from "./dtos/create-soil.dto";
 import { UpdateSoilDto } from "./dtos/update-soil.dto";
+import { UserRole } from "../auth/dtos/role.enum";
 
 @Injectable()
 export class SoilService {
@@ -88,19 +89,63 @@ export class SoilService {
     id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
-      const soil = await this.soilRepository.findOneBy({ id });
+      const existingSoil = await this.soilRepository.findOneBy({ id });
 
-      const { name } = soil;
-      // Soft delete by setting the "deleted" property
-      soil.deleted = new Date();
-      await this.soilRepository.save(soil);
+      if (!existingSoil) {
+        throw new NotFoundException(`Country with id ${id} not found`);
+      }
+
+      // Soft delete using the softDelete method
+      await this.soilRepository.softDelete({ id });
+      //await this.countryRepository.softRemove({ id });
+
       return {
         id,
-        name,
-        message: `Successfully deleted Soil with id ${id} and name ${name}`,
+        name: existingSoil.name,
+        message: `Successfully soft-deleted Soil with id ${id} and name ${existingSoil.name}`,
       };
     } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException(`Soil with id ${id} not found`);
+      }
+
       throw new NotFoundException(`Soil with id ${id} not found`);
+    }
+  }
+
+  async permanentlyDeleteSoilByIdForOwner(
+    id: string,
+    userRole: UserRole,
+  ): Promise<{ id: string; name: string; message: string }> {
+    try {
+      const existingSoil = await this.soilRepository.findOneBy({ id });
+
+      if (!existingSoil) {
+        throw new NotFoundException(`Soil with id ${id} not found`);
+      }
+
+      // Check if the user has the necessary role (OWNER) to perform the permanent delete
+      if (userRole !== UserRole.OWNER) {
+        throw new NotFoundException("User does not have the required role");
+      }
+
+      // Perform the permanent delete
+      await this.soilRepository.remove(existingSoil);
+
+      return {
+        id,
+        name: existingSoil.name,
+        message: `Successfully permanently deleted Soil with id ${id} and name ${existingSoil.name}`,
+      };
+    } catch (error) {
+      // Handle EntityNotFoundError specifically
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException(`Soil with id ${id} not found`);
+      }
+
+      throw new NotFoundException(
+        `Failed to permanently delete Soil with id ${id}`,
+      );
     }
   }
 }

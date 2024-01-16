@@ -9,18 +9,21 @@ import {
   Param,
   Delete,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/guards/auth.guard";
 import { CreateFieldDto } from "./dtos/create-field.dto";
 import { CreateFieldOnlyDto } from "./dtos/create-field-only.dto";
 import { UpdateFieldDto } from "./dtos/update-field.dto";
 import { FieldService } from "./field.service";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { Roles } from "../auth/decorator/roles.decorator";
+import { UserRole } from "../auth/dtos/role.enum";
 
 @Controller("field")
-@UseGuards(AuthGuard)
+@UseGuards(RolesGuard)
 export class FieldController {
   constructor(private fieldService: FieldService) {}
 
   // Cteare Field Only. No soil
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("/createField")
   async createField(@Body() createFieldOnlyDto: CreateFieldOnlyDto) {
     try {
@@ -35,6 +38,7 @@ export class FieldController {
   }
 
   // Cteare Field and create new Soil. If there is no Soil - create new Soil. If there is a Soil - select from existing Soil
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("createFieldWithSoil")
   async createFieldWithSoil(@Body() createFieldDto: CreateFieldDto) {
     try {
@@ -82,6 +86,7 @@ export class FieldController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateField(
     @Param("id") id: string,
@@ -104,6 +109,7 @@ export class FieldController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
   async deleteFieldById(
     @Param("id") id: string,

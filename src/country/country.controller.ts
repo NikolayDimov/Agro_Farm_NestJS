@@ -82,7 +82,6 @@ export class CountryController {
     }
   }
 
-  // For permanent delete accessible only by OWNER
   @Roles(UserRole.OWNER)
   @Delete(":id/permanent")
   async permanentlyDeleteCountryByIdForOwner(

@@ -9,16 +9,19 @@ import {
   Param,
   NotFoundException,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/guards/auth.guard";
 import { CropService } from "./crop.service";
 import { CreateCropDto } from "./dtos/create-crop.dto";
 import { UpdateCropDto } from "./dtos/update-crop.dto";
+import { RolesGuard } from "src/auth/guards/roles.guard";
+import { Roles } from "../auth/decorator/roles.decorator";
+import { UserRole } from "../auth/dtos/role.enum";
 
 @Controller("crop")
-@UseGuards(AuthGuard)
+@UseGuards(RolesGuard)
 export class CropController {
   constructor(private readonly cropService: CropService) {}
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("/createCrop")
   async createCrop(@Body() createCropDto: CreateCropDto) {
     try {
@@ -49,6 +52,7 @@ export class CropController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateCrop(
     @Param("id") id: string,
@@ -62,6 +66,7 @@ export class CropController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
   async deleteCropById(
     @Param("id") id: string,
@@ -71,6 +76,21 @@ export class CropController {
     } catch (error) {
       console.error("Error deleting crop:", error);
       throw new NotFoundException("Failed to delete crop");
+    }
+  }
+
+  @Roles(UserRole.OWNER)
+  @Delete(":id/permanent")
+  async permanentlyDeleteCropByIdForOwner(
+    @Param("id") id: string,
+  ): Promise<{ id: string; name: string; message: string }> {
+    try {
+      const userRole = UserRole.OWNER;
+
+      return this.cropService.permanentlyDeleteCropByIdForOwner(id, userRole);
+    } catch (error) {
+      console.error("Error permanently deleting crop:", error);
+      throw new NotFoundException("Failed to permanently delete crop");
     }
   }
 }

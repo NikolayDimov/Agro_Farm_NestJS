@@ -116,7 +116,8 @@ export class CountryService {
       }
 
       // Soft delete using the softDelete method
-      await this.countryRepository.softDelete(id);
+      await this.countryRepository.softDelete({ id });
+      //await this.countryRepository.softRemove({ id });
 
       return {
         id,
@@ -134,7 +135,7 @@ export class CountryService {
 
   async permanentlyDeleteCountryByIdForOwner(
     id: string,
-    userRole: UserRole, // Assuming you pass the user's role to the service method
+    userRole: UserRole,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       const existingCountry = await this.countryRepository.findOneBy({ id });
@@ -157,7 +158,6 @@ export class CountryService {
         message: `Successfully permanently deleted Country with id ${id} and name ${existingCountry.name}`,
       };
     } catch (error) {
-      // Handle EntityNotFoundError specifically
       if (error instanceof EntityNotFoundError) {
         throw new NotFoundException(`Country with id ${id} not found`);
       }

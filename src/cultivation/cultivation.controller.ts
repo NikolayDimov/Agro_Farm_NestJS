@@ -9,18 +9,21 @@ import {
   //Param,
   //Delete,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/guards/auth.guard";
 import { CreateCultivationDto } from "./dtos/create-cultivation.dto";
 import { CreateCultivationOnlyDto } from "./dtos/create-cultivation-only.dto";
 //import { UpdateCultivationDto } from "./dtos/update-cultivation.dto";
 import { CultivationService } from "./cultivation.service";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { Roles } from "../auth/decorator/roles.decorator";
+import { UserRole } from "../auth/dtos/role.enum";
 
 @Controller("cultivation")
-@UseGuards(AuthGuard)
+@UseGuards(RolesGuard)
 export class CultivationController {
   constructor(private cultivationService: CultivationService) {}
 
   // Cteare Cultivation Only. No growing-period, cultivation-type, machine
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("/createCultivation")
   async createCultivation(
     @Body() createCultivationOnlyDto: CreateCultivationOnlyDto,
@@ -39,6 +42,7 @@ export class CultivationController {
   }
 
   // Cteare Cultivation with growing_period, cultivation_type and machine. If there is no created Attributes - create new cultivation_type and machine. If there is a existing Attributes - select from existing cultivation_type and machine. Growing_period is UUID and always must be created
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("createCultivationWithAttributes")
   async createCultivationWithAttributes(
     @Body() createCultivationDto: CreateCultivationDto,

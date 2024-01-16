@@ -9,16 +9,19 @@ import {
   Param,
   NotFoundException,
 } from "@nestjs/common";
-import { AuthGuard } from "../auth/guards/auth.guard";
 import { CreateMachineDto } from "./dtos/create-machine.dto";
 import { MachineService } from "./machine.service";
 import { UpdateMachineDto } from "./dtos/update-machine.dto";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { Roles } from "../auth/decorator/roles.decorator";
+import { UserRole } from "../auth/dtos/role.enum";
 
 @Controller("machine")
-@UseGuards(AuthGuard)
+@UseGuards(RolesGuard)
 export class MachineController {
   constructor(private machineService: MachineService) {}
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("/createMachine")
   async createMachine(@Body() createMachineDto: CreateMachineDto) {
     try {
@@ -56,6 +59,7 @@ export class MachineController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateMachine(
     @Param("id") id: string,
@@ -69,6 +73,7 @@ export class MachineController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
   async deleteMachineById(@Param("id") id: string): Promise<{
     id: string;

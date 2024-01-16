@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, Matches } from "class-validator";
+import { IsLatLong, IsNotEmpty, IsString, Matches } from "class-validator";
 
 export class CreateFarmOnlyDto {
   @IsNotEmpty({ message: "Name cannot be empty" })
@@ -7,4 +7,7 @@ export class CreateFarmOnlyDto {
     message: "Name must contain only letters and numbers",
   })
   name: string;
+
+  @IsLatLong({ message: "Name cannot be empty" })
+  location: string;
 }
