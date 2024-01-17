@@ -1,4 +1,10 @@
-import { Controller, ValidationPipe, Body, Post } from "@nestjs/common";
+import {
+  Controller,
+  ValidationPipe,
+  Body,
+  Post,
+  NotFoundException,
+} from "@nestjs/common";
 import { CreateGrowingPeriodDto } from "./dtos/create-growing-period.dto";
 import { GrowingPeriodService } from "./growing-period.service";
 import { GrowingPeriod } from "./growing-period.entity";
@@ -11,8 +17,13 @@ export class GrowingPeriodController {
   async createGrowingPeriod(
     @Body(ValidationPipe) createGrowingPeriodDto: CreateGrowingPeriodDto,
   ): Promise<GrowingPeriod> {
-    return this.growingPeriodService.createGrowingPeriod(
-      createGrowingPeriodDto,
-    );
+    try {
+      return this.growingPeriodService.createGrowingPeriod(
+        createGrowingPeriodDto,
+      );
+    } catch (error) {
+      console.error("Error creating country", error);
+      throw new NotFoundException("Failed to delete country");
+    }
   }
 }

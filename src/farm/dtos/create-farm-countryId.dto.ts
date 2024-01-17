@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, Matches, ValidateNested } from "class-validator";
+import { IsNotEmpty, IsString, IsUUID, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 
 class LocationDto {
@@ -7,17 +7,13 @@ class LocationDto {
   coordinates: [number, number];
 }
 
-export class CreateFarmDto {
+export class CreateFarmCountryIdDto {
   @IsNotEmpty({ message: "Name cannot be empty" })
   @IsString({ message: "Name must be a string" })
   name: string;
 
-  @IsNotEmpty()
-  @IsString()
-  @Matches(/^[A-Za-z0-9\s]+$/, {
-    message: "Country Name must contain only letters and numbers",
-  })
-  countryName: string;
+  @IsUUID(undefined, { message: "Invalid country ID" })
+  countryId: string;
 
   @ValidateNested()
   @Type(() => LocationDto)

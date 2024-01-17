@@ -28,7 +28,7 @@ export class SoilController {
       return this.soilService.createSoil(createSoilDto);
     } catch (error) {
       console.error("Error creating soil:", error);
-      throw new NotFoundException("Failed to create soil");
+      return { success: false, message: error.message };
     }
   }
 
@@ -39,7 +39,7 @@ export class SoilController {
       return { data: soils };
     } catch (error) {
       console.error("Error fetching all soils:", error);
-      throw new NotFoundException("Failed to fetch soils");
+      return { success: false, message: error.message };
     }
   }
 
@@ -47,15 +47,13 @@ export class SoilController {
   async getSoilById(@Param("id") id: string) {
     try {
       const soil = await this.soilService.findById(id);
-
       if (!soil) {
         throw new NotFoundException("Soil not found");
       }
-
       return { data: soil };
     } catch (error) {
       console.error("Error fetching soil by ID:", error);
-      throw new NotFoundException("Soil not found");
+      return { success: false, message: error.message };
     }
   }
 
@@ -69,7 +67,7 @@ export class SoilController {
       return this.soilService.updateSoil(id, updateSoilDto);
     } catch (error) {
       console.error("Error updating soil:", error);
-      throw new NotFoundException("Failed to update soil");
+      return { success: false, message: error.message };
     }
   }
 

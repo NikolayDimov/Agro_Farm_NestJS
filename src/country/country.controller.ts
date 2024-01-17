@@ -28,10 +28,7 @@ export class CountryController {
       return this.countryService.createCountry(createCountryDto);
     } catch (error) {
       console.error("Error creating country", error);
-      return {
-        message: "An error occurred while creating the country.",
-        statusCode: 500,
-      };
+      return { success: false, message: error.message };
     }
   }
 
@@ -41,7 +38,10 @@ export class CountryController {
       return this.countryService.findAll();
     } catch (error) {
       console.error("Error fetching all countries:", error);
-      throw new NotFoundException("Failed to fetch countries");
+      if (error instanceof NotFoundException) {
+        return { error: "Farm not found" };
+      }
+      return { success: false, message: error.message };
     }
   }
 
@@ -51,7 +51,10 @@ export class CountryController {
       return this.countryService.findById(id);
     } catch (error) {
       console.error("Error fetching country by ID:", error);
-      throw new NotFoundException("Country not found");
+      if (error instanceof NotFoundException) {
+        return { error: "Farm not found" };
+      }
+      return { success: false, message: error.message };
     }
   }
 
@@ -65,7 +68,10 @@ export class CountryController {
       return this.countryService.updateCountry(id, updateCountryDto);
     } catch (error) {
       console.error("Error updating country:", error);
-      throw new NotFoundException("Failed to update country");
+      if (error instanceof NotFoundException) {
+        return { error: "Farm not found" };
+      }
+      return { success: false, message: error.message };
     }
   }
 

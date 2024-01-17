@@ -16,6 +16,7 @@ import { FarmService } from "./farm.service";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorator/roles.decorator";
 import { UserRole } from "../auth/dtos/role.enum";
+import { CreateFarmCountryIdDto } from "./dtos/create-farm-countryId.dto";
 
 @Controller("farm")
 @UseGuards(RolesGuard)
@@ -29,15 +30,12 @@ export class FarmController {
     try {
       return this.farmService.createFarmOnly(createFarmOnlyDto);
     } catch (error) {
-      console.error("Error creating farm:", error);
-      return {
-        message: "An error occurred while creating the farm.",
-        statusCode: 500,
-      };
+      console.error("Error creating farm with country:", error);
+      return { success: false, message: error.message };
     }
   }
 
-  // Cteare Farm and create new Country. If there is no Country - create new Country. If there is a Country - select from existing Country
+  //Cteare Farm and create new Country. If there is no Country - create new Country. If there is a Country - select from existing Country
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("createFarmWithCountry")
   async createFarmWithCountry(@Body() createFarmDto: CreateFarmDto) {
@@ -47,10 +45,24 @@ export class FarmController {
       return { data: createdFarm };
     } catch (error) {
       console.error("Error creating farm with country:", error);
-      return {
-        message: "An error occurred while creating the farm.",
-        statusCode: 500,
-      };
+      return { success: false, message: error.message };
+    }
+  }
+
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
+  @Post("createFarmWithCountryId")
+  async createFarmWithCountryId(
+    @Body() createFarmCountryIdDto: CreateFarmCountryIdDto,
+  ) {
+    console.log("Received request payload:", createFarmCountryIdDto);
+    try {
+      const createdFarm = await this.farmService.createFarmWithCountryId(
+        createFarmCountryIdDto,
+      );
+      return { data: createdFarm };
+    } catch (error) {
+      console.error("Error creating farm with country:", error);
+      return { success: false, message: error.message };
     }
   }
 
@@ -61,12 +73,10 @@ export class FarmController {
       return { data: transformedFarms };
     } catch (error) {
       console.error("Error fetching farms:", error);
-
       if (error instanceof NotFoundException) {
         return { error: "No farms found" };
       }
-
-      return { error: "An error occurred while fetching farms" };
+      return { success: false, message: error.message };
     }
   }
 
@@ -77,12 +87,10 @@ export class FarmController {
       return { data: transformedFarm };
     } catch (error) {
       console.error("Error fetching farm:", error);
-
       if (error instanceof NotFoundException) {
         return { error: "No farm found" };
       }
-
-      return { error: "An error occurred while fetching farm" };
+      return { success: false, message: error.message };
     }
   }
 
@@ -97,12 +105,10 @@ export class FarmController {
       return { data: updatedFarm };
     } catch (error) {
       console.error("Error updating farm:", error);
-
       if (error instanceof NotFoundException) {
         return { error: "Farm not found" };
       }
-
-      return { error: "An error occurred while updating the farm" };
+      return { success: false, message: error.message };
     }
   }
 
@@ -134,11 +140,3 @@ export class FarmController {
     }
   }
 }
-
-//  The function must delete farm and related country - now Delete Farm only, not Country
-// Function not work
-
-// @Delete(":id")
-// async deleteFarmAndCountryById(@Param("id") id: string): Promise<void> {
-//   await this.farmService.deleteFarmAndCountryById(id);
-// }

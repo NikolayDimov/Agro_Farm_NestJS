@@ -13,6 +13,7 @@ import { Soil } from "../soil/soil.entity";
 import { UserRole } from "../auth/dtos/role.enum";
 import { SoilService } from "../soil/soil.service";
 import { FarmService } from "../farm/farm.service";
+import { CreateFieldWithSoilIdDto } from "./dtos/create-fieldWithSoilId.dto";
 
 @Injectable()
 export class FieldService {
@@ -37,37 +38,63 @@ export class FieldService {
   }
 
   async createFieldWithSoil(createFieldDto: CreateFieldDto): Promise<Field> {
-    try {
-      const { name, boundary, soilName, farmId } = createFieldDto;
+    const { name, boundary, soilName, farmId } = createFieldDto;
 
-      // Check if the soil exists
-      let soil = await this.soilService.findOneByName(soilName);
+    // Check if the soil exists
+    let soil = await this.soilService.findOneByName(soilName);
 
-      // If the soil doesn't exist, create it
-      if (!soil) {
-        soil = await this.soilService.createSoil({ name: soilName });
-      }
-
-      const farm = await this.farmService.findOneById(farmId);
-      if (!farm) {
-        throw new BadRequestException(`No farm with ${farm.id}`);
-      }
-
-      // Create the field and associate it with the soil
-      const field = this.fieldRepository.create({
-        name,
-        boundary,
-        soil,
-        farm,
-      });
-
-      const createdField = await this.fieldRepository.save(field);
-      // Return the created field
-      return createdField;
-    } catch (error) {
-      console.error("Error creating field with soil:", error);
-      throw error;
+    // If the soil doesn't exist, create it
+    if (!soil) {
+      soil = await this.soilService.createSoil({ name: soilName });
     }
+
+    const farm = await this.farmService.findOneById(farmId);
+    if (!farm) {
+      throw new BadRequestException(`No farm with ${farm.id}`);
+    }
+
+    // Create the field and associate it with the soil
+    const field = this.fieldRepository.create({
+      name,
+      boundary,
+      soil,
+      farm,
+    });
+
+    const createdField = await this.fieldRepository.save(field);
+    // Return the created field
+    return createdField;
+  }
+
+  async createFieldWithSoilId(
+    createFieldWithSoilIdDto: CreateFieldWithSoilIdDto,
+  ): Promise<Field> {
+    const { name, boundary, soilId, farmId } = createFieldWithSoilIdDto;
+
+    // Check if the soil exists
+    let soil = await this.soilService.findOne(soilId);
+
+    // If the soil doesn't exist, create it
+    if (!soil) {
+      soil = await this.soilService.createSoilId({ id: soilId });
+    }
+
+    const farm = await this.farmService.findOneById(farmId);
+    if (!farm) {
+      throw new BadRequestException(`No farm with ${farm.id}`);
+    }
+
+    // Create the field and associate it with the soil
+    const field = this.fieldRepository.create({
+      name,
+      boundary,
+      soil,
+      farm,
+    });
+
+    const createdField = await this.fieldRepository.save(field);
+    // Return the created field
+    return createdField;
   }
 
   // transformField and transformSoil -- use for findAllWithSoil and findById
@@ -119,132 +146,107 @@ export class FieldService {
   }
 
   async findById(id: string): Promise<Field> {
-    try {
-      const field = await this.fieldRepository
-        .createQueryBuilder("field")
-        .leftJoinAndSelect("field.soil", "soil")
-        .leftJoinAndSelect("field.farm", "farm")
-        .andWhere("field.id = :id", { id })
-        .andWhere("field.deleted IS NULL")
-        .getOne();
+    const field = await this.fieldRepository
+      .createQueryBuilder("field")
+      .leftJoinAndSelect("field.soil", "soil")
+      .leftJoinAndSelect("field.farm", "farm")
+      .andWhere("field.id = :id", { id })
+      .andWhere("field.deleted IS NULL")
+      .getOne();
 
-      if (!field) {
-        throw new NotFoundException(`Field with ID ${id} not found`);
-      }
-
-      return this.transformField(field);
-    } catch (error) {
-      console.error("Error fetching field by ID:", error);
-      throw error;
+    if (!field) {
+      throw new NotFoundException(`Field with ID ${id} not found`);
     }
+
+    return this.transformField(field);
   }
 
   async updateField(
     id: string,
     updateFieldDto: UpdateFieldDto,
   ): Promise<Field> {
-    try {
-      // console.log("Received ID:", id);
-      // Find the field by ID
-      const field = await this.fieldRepository.findOne({
-        where: { id },
-        relations: ["soil"],
-      });
+    // console.log("Received ID:", id);
+    // Find the field by ID
+    const field = await this.fieldRepository.findOne({
+      where: { id },
+      relations: ["soil"],
+    });
 
-      // If soilName is provided, update the field's soil
-      if (updateFieldDto.soilName) {
-        // Check if the new soil exists
-        let newSoil = await this.soilService.findOneByName(
-          updateFieldDto.soilName, // Corrected from soilName to updateFieldDto.soilName
-        );
+    // If soilName is provided, update the field's soil
+    if (updateFieldDto.soilName) {
+      // Check if the new soil exists
+      let newSoil = await this.soilService.findOneByName(
+        updateFieldDto.soilName, // Corrected from soilName to updateFieldDto.soilName
+      );
 
-        // If the new soil doesn't exist, create it
-        if (!newSoil) {
-          newSoil = await this.soilService.createSoil({
-            name: updateFieldDto.soilName,
-          });
-        }
-
-        // Update the field's's soil
-        field.soil = newSoil;
+      // If the new soil doesn't exist, create it
+      if (!newSoil) {
+        newSoil = await this.soilService.createSoil({
+          name: updateFieldDto.soilName,
+        });
       }
 
-      // Update field'name
-      if (updateFieldDto.name) {
-        field.name = updateFieldDto.name;
-      }
-      // Update the fields'boundary
-      if (updateFieldDto.boundary) {
-        field.boundary = updateFieldDto.boundary;
-      }
-
-      // Save the updated field
-      const updatedField = await this.fieldRepository.save(field);
-
-      // console.log("Updated Field:", updatedField);
-      return updatedField;
-    } catch (error) {
-      console.error("Error updating field:", error);
-
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException(`Field with ID ${id} not found`);
-      }
-
-      throw new Error("An error occurred while updating the field");
+      // Update the field's's soil
+      field.soil = newSoil;
     }
+
+    // Update field'name
+    if (updateFieldDto.name) {
+      field.name = updateFieldDto.name;
+    }
+    // Update the fields'boundary
+    if (updateFieldDto.boundary) {
+      field.boundary = updateFieldDto.boundary;
+    }
+
+    // Save the updated field
+    const updatedField = await this.fieldRepository.save(field);
+
+    // console.log("Updated Field:", updatedField);
+    return updatedField;
   }
 
   async deleteFieldById(
     id: string,
   ): Promise<{ id: string; name: string; message: string }> {
-    try {
-      const existingField = await this.fieldRepository.findOneBy({ id });
+    const existingField = await this.fieldRepository.findOneBy({ id });
 
-      if (!existingField) {
-        throw new NotFoundException(`Field with id ${id} not found`);
-      }
-
-      // Soft delete using the softDelete method
-      await this.fieldRepository.softDelete({ id });
-
-      return {
-        id,
-        name: existingField.name,
-        message: `Successfully soft-deleted Field with id ${id} and name ${existingField.name}`,
-      };
-    } catch (error) {
+    if (!existingField) {
       throw new NotFoundException(`Field with id ${id} not found`);
     }
+
+    // Soft delete using the softDelete method
+    await this.fieldRepository.softDelete({ id });
+
+    return {
+      id,
+      name: existingField.name,
+      message: `Successfully soft-deleted Field with id ${id} and name ${existingField.name}`,
+    };
   }
 
   async permanentlyDeleteFieldByIdForOwner(
     id: string,
     userRole: UserRole,
   ): Promise<{ id: string; name: string; message: string }> {
-    try {
-      const existingField = await this.fieldRepository.findOneBy({ id });
+    const existingField = await this.fieldRepository.findOneBy({ id });
 
-      if (!existingField) {
-        throw new NotFoundException(`Field with id ${id} not found`);
-      }
-
-      // Check if the user has the necessary role (OWNER) to perform the permanent delete
-      if (userRole !== UserRole.OWNER) {
-        throw new NotFoundException("User does not have the required role");
-      }
-
-      // Perform the permanent delete
-      await this.fieldRepository.remove(existingField);
-
-      return {
-        id,
-        name: existingField.name,
-        message: `Successfully permanently deleted Field with id ${id} and name ${existingField.name}`,
-      };
-    } catch (error) {
-      throw new NotFoundException(
-        `Failed to permanently delete Field with id ${id}`,
-      );
+    if (!existingField) {
+      throw new NotFoundException(`Field with id ${id} not found`);
     }
+
+    // Check if the user has the necessary role (OWNER) to perform the permanent delete
+    if (userRole !== UserRole.OWNER) {
+      throw new NotFoundException("User does not have the required role");
+    }
+
+    // Perform the permanent delete
+    await this.fieldRepository.remove(existingField);
+
+    return {
+      id,
+      name: existingField.name,
+      message: `Successfully permanently deleted Field with id ${id} and name ${existingField.name}`,
+    };
   }
 }

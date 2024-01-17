@@ -30,10 +30,7 @@ export class FieldController {
       return this.fieldService.createFieldOnly(createFieldOnlyDto);
     } catch (error) {
       console.error("Error creating field:", error);
-      return {
-        message: "An error occurred while creating the field.",
-        statusCode: 500,
-      };
+      return { success: false, message: error.message };
     }
   }
 
@@ -47,10 +44,7 @@ export class FieldController {
       return { data: createdField };
     } catch (error) {
       console.error("Error creating field eith soil:", error);
-      return {
-        message: "An error occurred while creating the field.",
-        statusCode: 500,
-      };
+      return { success: false, message: error.message };
     }
   }
 
@@ -61,12 +55,7 @@ export class FieldController {
       return { data: transformedFields };
     } catch (error) {
       console.error("Error fetching fields:", error);
-
-      if (error instanceof NotFoundException) {
-        return { error: "No fields found" };
-      }
-
-      return { error: "An error occurred while fetching fields" };
+      return { success: false, message: error.message };
     }
   }
 
@@ -77,12 +66,7 @@ export class FieldController {
       return { data: transformedField };
     } catch (error) {
       console.error("Error fetching field:", error);
-
-      if (error instanceof NotFoundException) {
-        return { error: "No field found" };
-      }
-
-      return { error: "An error occurred while fetching field" };
+      return { success: false, message: error.message };
     }
   }
 
@@ -100,12 +84,7 @@ export class FieldController {
       return { data: updatedField };
     } catch (error) {
       console.error("Error updating field:", error);
-
-      if (error instanceof NotFoundException) {
-        return { error: "Field not found" };
-      }
-
-      return { error: "An error occurred while updating the field" };
+      return { success: false, message: error.message };
     }
   }
 

@@ -28,7 +28,7 @@ export class CropController {
       return this.cropService.createCrop(createCropDto);
     } catch (error) {
       console.error("Error creating crop:", error);
-      throw new NotFoundException("Failed to create crop");
+      return { success: false, message: error.message };
     }
   }
 
@@ -38,7 +38,7 @@ export class CropController {
       return this.cropService.findAll();
     } catch (error) {
       console.error("Error fetching all crops:", error);
-      throw new NotFoundException("Failed to fetch crops");
+      return { success: false, message: error.message };
     }
   }
 
@@ -48,7 +48,7 @@ export class CropController {
       return this.cropService.findById(id);
     } catch (error) {
       console.error("Error fetching crop by ID:", error);
-      throw new NotFoundException("Crop not found");
+      return { success: false, message: error.message };
     }
   }
 
@@ -62,7 +62,7 @@ export class CropController {
       return this.cropService.updateCrop(id, updateCropDto);
     } catch (error) {
       console.error("Error updating crop:", error);
-      throw new NotFoundException("Failed to update crop");
+      return { success: false, message: error.message };
     }
   }
 

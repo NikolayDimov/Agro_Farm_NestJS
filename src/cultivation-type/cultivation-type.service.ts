@@ -35,15 +35,10 @@ export class CultivationTypeService {
   }
 
   async findOneByName(name: string): Promise<CultivationType> {
-    try {
-      const cultivationTypeName = await this.cultivationTypeRepository.findOne({
-        where: { name },
-      });
-      return cultivationTypeName;
-    } catch (error) {
-      console.error("Error fetching cultivation type by name:", error);
-      throw error;
-    }
+    const cultivationTypeName = await this.cultivationTypeRepository.findOne({
+      where: { name },
+    });
+    return cultivationTypeName;
   }
 
   async findOne(

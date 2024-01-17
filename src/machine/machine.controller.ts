@@ -28,7 +28,7 @@ export class MachineController {
       return this.machineService.createMachine(createMachineDto);
     } catch (error) {
       console.error("Error creating machine:", error);
-      throw new NotFoundException("Failed to create machine");
+      return { success: false, message: error.message };
     }
   }
 
@@ -39,7 +39,7 @@ export class MachineController {
       return { data: machines };
     } catch (error) {
       console.error("Error fetching all machines:", error);
-      throw new NotFoundException("Failed to fetch machines");
+      return { success: false, message: error.message };
     }
   }
 
@@ -47,7 +47,6 @@ export class MachineController {
   async getMachineById(@Param("id") id: string) {
     try {
       const machine = await this.machineService.findById(id);
-
       if (!machine) {
         throw new NotFoundException("Machine not found");
       }
@@ -55,7 +54,7 @@ export class MachineController {
       return { data: machine };
     } catch (error) {
       console.error("Error fetching machine by ID:", error);
-      throw new NotFoundException("Machine not found");
+      return { success: false, message: error.message };
     }
   }
 
@@ -69,7 +68,7 @@ export class MachineController {
       return this.machineService.updateMachine(id, updateMachineDto);
     } catch (error) {
       console.error("Error updating machine:", error);
-      throw new NotFoundException("Failed to update machine");
+      return { success: false, message: error.message };
     }
   }
 

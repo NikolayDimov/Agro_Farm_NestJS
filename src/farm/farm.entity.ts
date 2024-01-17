@@ -21,6 +21,11 @@ export class Farm {
   @Column()
   name: string;
 
+  @Column({
+    type: "point",
+  })
+  location: string;
+
   // Connect to the user - not for our project
   // @ManyToOne(() => User, (user) => user.farms)
   // user: User;

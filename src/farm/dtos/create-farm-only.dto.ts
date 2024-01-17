@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsString, Matches } from "class-validator";
+import { IsCoordinate } from "./coordinate.validator";
 
 export class CreateFarmOnlyDto {
   @IsNotEmpty({ message: "Name cannot be empty" })
@@ -8,6 +9,8 @@ export class CreateFarmOnlyDto {
   })
   name: string;
 
-  // @IsLatLong({ message: "Name cannot be empty" })
-  // location: string;
+  @IsCoordinate({
+    message: "Location must be a valid coordinate (latitude,longitude)",
+  })
+  location: string;
 }

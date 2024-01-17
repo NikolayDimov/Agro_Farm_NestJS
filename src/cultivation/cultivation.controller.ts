@@ -34,10 +34,8 @@ export class CultivationController {
       );
     } catch (error) {
       console.error("Error creating cultivation with attributes:", error);
-      return {
-        message: "An error occurred while creating the cultivation.",
-        statusCode: 500,
-      };
+      const errorMessage = error?.response?.message || "An error occurred";
+      return { error: errorMessage };
     }
   }
 
@@ -55,10 +53,8 @@ export class CultivationController {
       return { data: createdCultivation };
     } catch (error) {
       console.error("Error creating cultivation with attributes:", error);
-      return {
-        message: "An error occurred while creating the cultivation.",
-        statusCode: 500,
-      };
+      const errorMessage = error?.response?.message || "An error occurred";
+      return { error: errorMessage };
     }
   }
 
@@ -75,7 +71,8 @@ export class CultivationController {
         return { error: "No fields found" };
       }
 
-      return { error: "An error occurred while fetching fields" };
+      const errorMessage = error?.response?.message || "An error occurred";
+      return { error: errorMessage };
     }
   }
 
