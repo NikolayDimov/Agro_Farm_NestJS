@@ -11,6 +11,7 @@ import {
 import { Machine } from "../machine/machine.entity";
 import { GrowingPeriod } from "../growing-period/growing-period.entity";
 import { CultivationType } from "../cultivation-type/cultivation-type.entity";
+import { IsDateString } from "class-validator";
 
 @Entity()
 export class Cultivation {
@@ -18,6 +19,7 @@ export class Cultivation {
   id: string;
 
   @Column({ type: "date" })
+  @IsDateString()
   date: Date;
 
   @ManyToOne(() => GrowingPeriod, (growingPeriod) => growingPeriod.cultivations)

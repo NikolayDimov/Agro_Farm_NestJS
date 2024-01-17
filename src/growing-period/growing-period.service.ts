@@ -17,9 +17,18 @@ export class GrowingPeriodService {
   ) {}
 
   async createGrowingPeriod(
-    createGrowingPeriodDto: CreateGrowingPeriodDto,
+    createGrowingPeriodDto?: Partial<CreateGrowingPeriodDto>,
   ): Promise<GrowingPeriod> {
+    createGrowingPeriodDto = createGrowingPeriodDto || {}; // Provide a default value if undefined
+
     const { fieldId, cropId } = createGrowingPeriodDto;
+
+    if (!fieldId || !cropId) {
+      throw new Error(
+        "fieldId and cropId are required in createGrowingPeriodDto",
+      );
+    }
+
     const field = await this.fieldService.findOneById(fieldId);
     const crop = await this.cropService.findOne(cropId);
 
@@ -38,11 +47,18 @@ export class GrowingPeriodService {
     return this.growingPeriodRepository.save(growingPeriod);
   }
 
-  async findOne(id: string): Promise<GrowingPeriod> {
-    const existingFieldId = await this.growingPeriodRepository.findOneBy({
-      id,
+  async findOne(
+    id: string,
+    options?: { relations?: string[] },
+  ): Promise<GrowingPeriod> {
+    if (!id) {
+      return null;
+    }
+
+    return await this.growingPeriodRepository.findOne({
+      where: { id },
+      relations: options?.relations,
     });
-    return existingFieldId;
   }
 
   async findOneById(id: string): Promise<GrowingPeriod> {

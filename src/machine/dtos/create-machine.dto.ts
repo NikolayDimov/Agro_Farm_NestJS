@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, Matches } from "class-validator";
+import { IsString, IsNotEmpty, Matches, IsUUID } from "class-validator";
 
 export class CreateMachineDto {
   @IsNotEmpty({ message: "Brand cannot be empty" })
@@ -21,4 +21,8 @@ export class CreateMachineDto {
     message: "Register Number must contain only letters and numbers",
   })
   registerNumber: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  farmId: string;
 }

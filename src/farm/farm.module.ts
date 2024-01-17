@@ -9,5 +9,6 @@ import { CountryModule } from "../country/country.module";
   imports: [TypeOrmModule.forFeature([Farm]), CountryModule],
   controllers: [FarmController],
   providers: [FarmService],
+  exports: [FarmService],
 })
 export class FarmModule {}

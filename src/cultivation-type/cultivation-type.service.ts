@@ -45,4 +45,18 @@ export class CultivationTypeService {
       throw error;
     }
   }
+
+  async findOne(
+    id: string,
+    options?: { relations?: string[] },
+  ): Promise<CultivationType> {
+    if (!id) {
+      return null;
+    }
+
+    return await this.cultivationTypeRepository.findOne({
+      where: { id },
+      relations: options?.relations,
+    });
+  }
 }

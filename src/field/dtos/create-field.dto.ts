@@ -19,4 +19,8 @@ export class CreateFieldDto {
     message: "Soil Name must contain only letters and numbers",
   })
   soilName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  farmId: string;
 }

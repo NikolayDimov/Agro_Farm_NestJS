@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Field } from "./field.entity";
@@ -8,12 +12,14 @@ import { UpdateFieldDto } from "./dtos/update-field.dto";
 import { Soil } from "../soil/soil.entity";
 import { UserRole } from "../auth/dtos/role.enum";
 import { SoilService } from "../soil/soil.service";
+import { FarmService } from "../farm/farm.service";
 
 @Injectable()
 export class FieldService {
   constructor(
     @InjectRepository(Field) private fieldRepository: Repository<Field>,
     private soilService: SoilService,
+    private farmService: FarmService,
   ) {}
 
   async createFieldOnly(
@@ -32,7 +38,7 @@ export class FieldService {
 
   async createFieldWithSoil(createFieldDto: CreateFieldDto): Promise<Field> {
     try {
-      const { name, boundary, soilName } = createFieldDto;
+      const { name, boundary, soilName, farmId } = createFieldDto;
 
       // Check if the soil exists
       let soil = await this.soilService.findOneByName(soilName);
@@ -42,11 +48,17 @@ export class FieldService {
         soil = await this.soilService.createSoil({ name: soilName });
       }
 
+      const farm = await this.farmService.findOneById(farmId);
+      if (!farm) {
+        throw new BadRequestException(`No farm with ${farm.id}`);
+      }
+
       // Create the field and associate it with the soil
       const field = this.fieldRepository.create({
         name,
         boundary,
         soil,
+        farm,
       });
 
       const createdField = await this.fieldRepository.save(field);

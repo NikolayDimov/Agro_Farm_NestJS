@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Cultivation } from "./cultivation.entity";
@@ -8,9 +8,6 @@ import { CreateCultivationOnlyDto } from "./dtos/create-cultivation-only.dto";
 import { GrowingPeriodService } from "../growing-period/growing-period.service";
 import { CultivationTypeService } from "../cultivation-type/cultivation-type.service";
 import { MachineService } from "../machine/machine.service";
-import { CultivationType } from "../cultivation-type/cultivation-type.entity";
-import { Machine } from "../machine/machine.entity";
-import { GrowingPeriod } from "../growing-period/growing-period.entity";
 
 @Injectable()
 export class CultivationService {
@@ -32,70 +29,61 @@ export class CultivationService {
     return this.cultivationRepository.save(newCultivation);
   }
 
-  // Inside your CultivationService
-
-  async getOrCreateGrowingPeriod(
-    growingPeriodId: string,
-  ): Promise<GrowingPeriod> {
-    const existingGrowingPeriod =
-      await this.growingPeriodService.findOne(growingPeriodId);
-
-    return existingGrowingPeriod;
-    //return existingGrowingPeriod || this.growingPeriodService.createGrowingPeriod();
-  }
-
-  async getOrCreateCultivationType(name: string): Promise<CultivationType> {
-    const existingCultivationType =
-      await this.cultivationTypeService.findOneByName(name);
-
-    return (
-      existingCultivationType ||
-      this.cultivationTypeService.createCultivationType({ name })
-    );
-  }
-
-  async getExistingMachine(machineId: string): Promise<Machine> {
-    const existingMachine = await this.machineService.findOneById(machineId);
-    if (!existingMachine) {
-      throw new NotFoundException(`Machine with ID ${machineId} not found`);
-    }
-    return existingMachine;
-  }
-
   async createCultivationWithAttributes(
     createCultivationDto: CreateCultivationDto,
   ): Promise<Cultivation> {
-    try {
-      const { date, cultivationTypeName, machineId, growingPeriod } =
-        createCultivationDto;
+    const { date, cultivationTypeId, machineId, growingPeriodId } =
+      createCultivationDto;
 
-      const existingGrowingPeriod =
-        await this.getOrCreateGrowingPeriod(growingPeriod);
-
-      const cultivationType =
-        await this.getOrCreateCultivationType(cultivationTypeName);
-      const existingMachine = await this.getExistingMachine(machineId);
-
-      // Create the cultivation and associate it with the growing_period, cultivation_type, and machine
-      const cultivation = this.cultivationRepository.create({
-        date,
-        growingPeriod: existingGrowingPeriod, // Associate the existing growing period
-        cultivationType,
-        machine: existingMachine,
-      });
-
-      const createdCultivation =
-        await this.cultivationRepository.save(cultivation);
-
-      // Return the created cultivation
-      return createdCultivation;
-    } catch (error) {
-      console.error(
-        "Error creating cultivation with growing_period, cultivation_type, and machine:",
-        error,
+    const growingPeriod = await this.growingPeriodService.findOne(
+      growingPeriodId,
+      { relations: ["field", "field.farm"] },
+    );
+    if (!growingPeriod) {
+      throw new BadRequestException(
+        `There is no growing period with id ${growingPeriodId}`,
       );
-      throw error;
     }
+
+    const cultivationType =
+      await this.cultivationTypeService.findOne(cultivationTypeId);
+    if (!cultivationTypeId) {
+      throw new BadRequestException(
+        `There is no cultivation type with id ${cultivationTypeId}`,
+      );
+    }
+
+    const machine = await this.machineService.findOne(machineId, {
+      relations: ["farm"],
+    });
+    if (!machine) {
+      throw new BadRequestException(
+        `There is no machine type with id ${machineId}`,
+      );
+    }
+    console.log(machine);
+    console.log(growingPeriod);
+    console.log(cultivationType);
+
+    if (machine.farm.id !== growingPeriod.field.farm.id) {
+      throw new BadRequestException(
+        `There is no machine with id ${machineId} in current farm`,
+      );
+    }
+
+    // Create the cultivation and associate it with the growing_period, cultivation_type, and machine
+    const cultivation = this.cultivationRepository.create({
+      date,
+      growingPeriod,
+      cultivationType,
+      machine,
+    });
+
+    const createdCultivation =
+      await this.cultivationRepository.save(cultivation);
+
+    // Return the created cultivation
+    return createdCultivation;
   }
 
   // transformField and transformSoil -- use for findAllWithSoil and findById

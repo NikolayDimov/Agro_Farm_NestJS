@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsDateString, IsUUID, IsString } from "class-validator";
+import { IsNotEmpty, IsDateString, IsUUID } from "class-validator";
 // import { MachineDto } from "src/machine/dtos/machine.dto";
 
 export class CreateCultivationDto {
@@ -8,11 +8,11 @@ export class CreateCultivationDto {
 
   @IsNotEmpty()
   @IsUUID()
-  growingPeriod: string;
+  growingPeriodId: string;
 
   @IsNotEmpty()
-  @IsString()
-  cultivationTypeName: string;
+  @IsUUID()
+  cultivationTypeId: string;
 
   @IsNotEmpty()
   @IsUUID()

@@ -42,6 +42,27 @@ export class FarmService {
     return createdFarm;
   }
 
+  async findOne(id: string, options?: { relations?: string[] }): Promise<Farm> {
+    if (!id) {
+      return null;
+    }
+
+    return await this.farmRepository.findOne({
+      where: { id },
+      relations: options?.relations,
+    });
+  }
+
+  async findOneById(id: string): Promise<Farm> {
+    try {
+      const farm = await this.farmRepository.findOne({ where: { id } });
+      return farm;
+    } catch (error) {
+      console.error("Error fetching farm by name:", error);
+      throw new NotFoundException("No farm found");
+    }
+  }
+
   // transformFarm and transformCountry -- use for findAllWithCountries and findById
   private transformFarm(farm: Farm) {
     return {

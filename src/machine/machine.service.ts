@@ -5,36 +5,38 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { validate } from "class-validator";
+//import { validate } from "class-validator";
 import { Machine } from "./machine.entity";
 import { CreateMachineDto } from "./dtos/create-machine.dto";
 import { UpdateMachineDto } from "./dtos/update-machine.dto";
 import { UserRole } from "../auth/dtos/role.enum";
+import { FarmService } from "../farm/farm.service";
 
 @Injectable()
 export class MachineService {
   constructor(
     @InjectRepository(Machine) private machineRepository: Repository<Machine>,
+    private farmService: FarmService,
   ) {}
 
   async createMachine(createMachineDto: CreateMachineDto): Promise<Machine> {
-    const errors = await validate(createMachineDto);
+    const { brand, model, registerNumber, farmId } = createMachineDto;
 
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
+    const farm = await this.farmService.findOne(farmId);
+
+    if (!farm) {
+      throw new BadRequestException("No machine found");
     }
 
-    try {
-      const { brand, model, registerNumber } = createMachineDto;
-      const newMachine = this.machineRepository.create({
-        brand,
-        model,
-        registerNumber,
-      });
-      return await this.machineRepository.save(newMachine);
-    } catch (error) {
-      throw new BadRequestException("Error creating crop: " + error.message);
-    }
+    const machine = this.machineRepository.create({
+      brand,
+      model,
+      registerNumber,
+      farm: farm,
+    });
+
+    const createdMachine = await this.machineRepository.save(machine);
+    return createdMachine;
   }
 
   async findOneByName(
@@ -68,6 +70,20 @@ export class MachineService {
     } catch (error) {
       throw new NotFoundException(`Machine with ID ${id} not found`);
     }
+  }
+
+  async findOne(
+    id: string,
+    options?: { relations?: string[] },
+  ): Promise<Machine> {
+    if (!id) {
+      return null;
+    }
+
+    return await this.machineRepository.findOne({
+      where: { id },
+      relations: options?.relations,
+    });
   }
 
   async findAll(): Promise<Machine[]> {
