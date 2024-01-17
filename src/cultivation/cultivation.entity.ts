@@ -17,10 +17,10 @@ export class Cultivation {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ type: "timestamp" })
+  @Column({ type: "date" })
   date: Date;
 
-  @ManyToOne(() => GrowingPeriod, (growingPeriod) => growingPeriod.id)
+  @ManyToOne(() => GrowingPeriod, (growingPeriod) => growingPeriod.cultivations)
   @JoinColumn({ name: "growing_period_id" })
   growingPeriod: GrowingPeriod;
 
@@ -31,7 +31,7 @@ export class Cultivation {
   @JoinColumn({ name: "cultivation_type_id" })
   cultivationType: CultivationType;
 
-  @ManyToOne(() => Machine, (machine) => machine.id)
+  @ManyToOne(() => Machine, (machine) => machine.cultivations)
   @JoinColumn({ name: "machine_id" })
   machine: Machine;
 

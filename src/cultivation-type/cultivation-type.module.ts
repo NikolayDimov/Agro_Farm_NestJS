@@ -8,6 +8,9 @@ import { CultivationType } from "./cultivation-type.entity";
   imports: [TypeOrmModule.forFeature([CultivationType])],
   controllers: [CultivationTypeController],
   providers: [CultivationTypeService],
-  exports: [TypeOrmModule],
+  exports: [
+    TypeOrmModule.forFeature([CultivationType]),
+    CultivationTypeService,
+  ],
 })
 export class CultivationTypeModule {}

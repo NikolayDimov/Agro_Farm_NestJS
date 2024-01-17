@@ -1,11 +1,11 @@
 import {
   Controller,
   UseGuards,
-  // Get,
+  Get,
   Post,
   //Patch,
   Body,
-  // NotFoundException,
+  NotFoundException,
   //Param,
   //Delete,
 } from "@nestjs/common";
@@ -62,21 +62,22 @@ export class CultivationController {
     }
   }
 
-  // @Get("getAll")
-  // async getAllFields() {
-  //   try {
-  //     const transformedFields = await this.fieldService.findAllWithSoil();
-  //     return { data: transformedFields };
-  //   } catch (error) {
-  //     console.error("Error fetching fields:", error);
+  @Get("getAll")
+  async getAllFields() {
+    try {
+      const transformedFields =
+        await this.cultivationService.findAllWithAttributes();
+      return { data: transformedFields };
+    } catch (error) {
+      console.error("Error fetching cultivation:", error);
 
-  //     if (error instanceof NotFoundException) {
-  //       return { error: "No fields found" };
-  //     }
+      if (error instanceof NotFoundException) {
+        return { error: "No fields found" };
+      }
 
-  //     return { error: "An error occurred while fetching fields" };
-  //   }
-  // }
+      return { error: "An error occurred while fetching fields" };
+    }
+  }
 
   //   @Get(":id")
   //   async getFieldById(@Param("id") id: string) {

@@ -25,10 +25,10 @@ import { CropModule } from "./crop/crop.module";
 
     TypeOrmModule.forRoot(dataSourceOptions),
 
+    AuthModule,
     UsersModule,
     FarmModule,
     CountryModule,
-    AuthModule,
     FieldModule,
     SoilModule,
     CultivationModule,

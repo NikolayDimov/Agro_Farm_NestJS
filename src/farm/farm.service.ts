@@ -1,20 +1,19 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EntityNotFoundError, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { Farm } from "./farm.entity";
 import { CreateFarmDto } from "./dtos/create-farm.dto";
 import { CreateFarmOnlyDto } from "./dtos/create-farm-only.dto";
 import { UpdateFarmDto } from "./dtos/update-farm.dto";
 import { Country } from "../country/country.entity";
 import { UserRole } from "../auth/dtos/role.enum";
-// import { Field } from "../field/field.entity";
+import { CountryService } from "../country/country.service";
 
 @Injectable()
 export class FarmService {
   constructor(
     @InjectRepository(Farm) private farmRepository: Repository<Farm>,
-    @InjectRepository(Country)
-    private readonly countryRepository: Repository<Country>,
+    private countryService: CountryService,
   ) {}
 
   async createFarmOnly(createFarmOnlyDto: CreateFarmOnlyDto): Promise<Farm> {
@@ -28,13 +27,10 @@ export class FarmService {
   async createFarmWithCountry(createFarmDto: CreateFarmDto): Promise<Farm> {
     const { name, countryName } = createFarmDto;
 
-    let country = await this.countryRepository.findOneBy({
-      name: countryName,
-    });
+    let country = await this.countryService.findOneByName(countryName);
 
     if (!country) {
-      country = await this.countryRepository.create({ name: countryName });
-      await this.countryRepository.save(country);
+      country = await this.countryService.createCountry({ name: countryName });
     }
 
     const farm = this.farmRepository.create({
@@ -42,9 +38,8 @@ export class FarmService {
       country,
     });
 
-    await this.farmRepository.save(farm);
-
-    return farm;
+    const createdFarm = await this.farmRepository.save(farm);
+    return createdFarm;
   }
 
   // transformFarm and transformCountry -- use for findAllWithCountries and findById
@@ -75,6 +70,17 @@ export class FarmService {
     return farms.map((farm) => this.transformFarm(farm));
   }
 
+  // async findAllWithCountries() {
+  //   const fields = await this.farmRepository
+  //     .createQueryBuilder("farm")
+  //     .leftJoinAndSelect("farm.country", "country")
+  //     .leftJoinAndSelect("country.farm", "farm")
+  //     .where("farm.deleted IS NULL")
+  //     .getMany();
+
+  //   return fields.map((farm) => this.transformFarm(farm));
+  // }
+
   async findById(id: string) {
     try {
       const farm = await this.farmRepository
@@ -102,40 +108,33 @@ export class FarmService {
         where: { id },
         relations: ["country"],
       });
-
       // If countryName is provided, update the farm's country
       if (updateFarmDto.countryName) {
         // Check if the new country exists
-        let newCountry = await this.countryRepository.findOneBy({ id });
-
+        let newCountry = await this.countryService.findOneByName(
+          updateFarmDto.countryName,
+        );
         // If the new country doesn't exist, create it
         if (!newCountry) {
-          newCountry = await this.countryRepository.create({
+          newCountry = await this.countryService.createCountry({
             name: updateFarmDto.countryName,
           });
-          await this.countryRepository.save(newCountry);
         }
-
         // Update the farm's country
         farm.country = newCountry;
       }
-
       // Update farm
       if (updateFarmDto.name) {
         farm.name = updateFarmDto.name;
       }
-
       // Save the updated farm
       const updatedFarm = await this.farmRepository.save(farm);
-
       return updatedFarm;
     } catch (error) {
       console.error("Error updating farm:", error);
-
       if (error instanceof NotFoundException) {
         throw new NotFoundException(`Farm with ID ${id} not found`);
       }
-
       throw new Error("An error occurred while updating the farm");
     }
   }
@@ -144,16 +143,19 @@ export class FarmService {
     id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
-      const farm = await this.farmRepository.findOneBy({ id });
+      const existingFarm = await this.farmRepository.findOneBy({ id });
 
-      const { name } = farm;
-      // Soft delete by setting the "deleted" property
-      farm.deleted = new Date();
-      await this.farmRepository.save(farm);
+      if (!existingFarm) {
+        throw new NotFoundException(`Farm with id ${id} not found`);
+      }
+
+      // Soft delete using the softDelete method
+      await this.farmRepository.softDelete({ id });
+
       return {
         id,
-        name,
-        message: `Successfully deleted Farm with id ${id} and name ${name}`,
+        name: existingFarm.name,
+        message: `Successfully soft-deleted Farm with id ${id} and name ${existingFarm.name}`,
       };
     } catch (error) {
       throw new NotFoundException(`Farm with id ${id} not found`);
@@ -185,10 +187,6 @@ export class FarmService {
         message: `Successfully permanently deleted Farm with id ${id} and name ${existingFarm.name}`,
       };
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new NotFoundException(`farm with id ${id} not found`);
-      }
-
       throw new NotFoundException(
         `Failed to permanently delete farm with id ${id}`,
       );

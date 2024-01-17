@@ -16,9 +16,9 @@ export class FieldDto {
 
   @Expose()
   @Type(() => CultivationTypeDto)
-  cultivationType: CultivationTypeDto;
+  cultivationTypeName: CultivationTypeDto;
 
   @Expose()
   @Type(() => MachineDto)
-  machine: MachineDto;
+  machineId: MachineDto;
 }

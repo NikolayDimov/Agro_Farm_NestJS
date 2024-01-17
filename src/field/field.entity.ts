@@ -7,12 +7,12 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   JoinColumn,
-  // OneToMany,
+  OneToMany,
 } from "typeorm";
 import { MultiPolygon } from "geojson";
 import { Farm } from "../farm/farm.entity";
 import { Soil } from "../soil/soil.entity";
-// import { GrowingPeriod } from "../growing-period/growing-period.entity";
+import { GrowingPeriod } from "../growing-period/growing-period.entity";
 
 @Entity()
 export class Field {
@@ -47,8 +47,8 @@ export class Field {
   // soil: Field;
 
   // When get all fields wants growingPeriods
-  // @OneToMany(() => GrowingPeriod, (growingPeriod) => growingPeriod.field)
-  // growingPeriods: GrowingPeriod[];
+  @OneToMany(() => GrowingPeriod, (growingPeriod) => growingPeriod.field)
+  growingPeriods: GrowingPeriod[];
 
   @CreateDateColumn({ type: "timestamp", name: "created_at" })
   created: Date;

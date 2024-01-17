@@ -1,10 +1,13 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Cultivation } from "./cultivation.entity";
 import { CreateCultivationDto } from "./dtos/create-cultivation.dto";
 import { CreateCultivationOnlyDto } from "./dtos/create-cultivation-only.dto";
 //import { UpdateCultivationDto } from "./dtos/update-cultivation.dto";
+import { GrowingPeriodService } from "../growing-period/growing-period.service";
+import { CultivationTypeService } from "../cultivation-type/cultivation-type.service";
+import { MachineService } from "../machine/machine.service";
 import { CultivationType } from "../cultivation-type/cultivation-type.entity";
 import { Machine } from "../machine/machine.entity";
 import { GrowingPeriod } from "../growing-period/growing-period.entity";
@@ -14,12 +17,9 @@ export class CultivationService {
   constructor(
     @InjectRepository(Cultivation)
     private cultivationRepository: Repository<Cultivation>,
-    @InjectRepository(GrowingPeriod)
-    private growingPeriodRepository: Repository<GrowingPeriod>,
-    @InjectRepository(CultivationType)
-    private cultivationTypeRepository: Repository<CultivationType>,
-    @InjectRepository(Machine)
-    private machineRepository: Repository<Machine>,
+    private growingPeriodService: GrowingPeriodService,
+    private cultivationTypeService: CultivationTypeService,
+    private machineService: MachineService,
   ) {}
 
   async createCultivationOnly(
@@ -32,60 +32,63 @@ export class CultivationService {
     return this.cultivationRepository.save(newCultivation);
   }
 
+  // Inside your CultivationService
+
+  async getOrCreateGrowingPeriod(
+    growingPeriodId: string,
+  ): Promise<GrowingPeriod> {
+    const existingGrowingPeriod =
+      await this.growingPeriodService.findOne(growingPeriodId);
+
+    return existingGrowingPeriod;
+    //return existingGrowingPeriod || this.growingPeriodService.createGrowingPeriod();
+  }
+
+  async getOrCreateCultivationType(name: string): Promise<CultivationType> {
+    const existingCultivationType =
+      await this.cultivationTypeService.findOneByName(name);
+
+    return (
+      existingCultivationType ||
+      this.cultivationTypeService.createCultivationType({ name })
+    );
+  }
+
+  async getExistingMachine(machineId: string): Promise<Machine> {
+    const existingMachine = await this.machineService.findOneById(machineId);
+    if (!existingMachine) {
+      throw new NotFoundException(`Machine with ID ${machineId} not found`);
+    }
+    return existingMachine;
+  }
+
   async createCultivationWithAttributes(
     createCultivationDto: CreateCultivationDto,
   ): Promise<Cultivation> {
     try {
-      const { date, cultivationType, machine } = createCultivationDto;
+      const { date, cultivationTypeName, machineId, growingPeriod } =
+        createCultivationDto;
 
-      // Always create a new growing period
-      const newGrowingPeriod = await this.growingPeriodRepository.create();
-      await this.growingPeriodRepository.save(newGrowingPeriod);
+      const existingGrowingPeriod =
+        await this.getOrCreateGrowingPeriod(growingPeriod);
 
-      // Check if the cultivationType exists
-      let cultivationTypeObj = await this.cultivationTypeRepository.findOne({
-        where: { name: cultivationType },
-      });
-
-      // If the cultivationType doesn't exist, create it
-      if (!cultivationTypeObj) {
-        cultivationTypeObj = await this.cultivationTypeRepository.create({
-          name: cultivationType,
-        });
-        await this.cultivationTypeRepository.save(cultivationTypeObj);
-      }
-
-      // Check if the machine exists
-      let machineObj = await this.machineRepository.findOne({
-        where: {
-          brand: machine.brand,
-          model: machine.model,
-          registerNumber: machine.registerNumber,
-        },
-      });
-
-      // If the machine doesn't exist, create it
-      if (!machineObj) {
-        machineObj = await this.machineRepository.create({
-          brand: machine.brand,
-          model: machine.model,
-          registerNumber: machine.registerNumber,
-        });
-        await this.machineRepository.save(machineObj);
-      }
+      const cultivationType =
+        await this.getOrCreateCultivationType(cultivationTypeName);
+      const existingMachine = await this.getExistingMachine(machineId);
 
       // Create the cultivation and associate it with the growing_period, cultivation_type, and machine
       const cultivation = this.cultivationRepository.create({
         date,
-        growingPeriod: newGrowingPeriod,
-        cultivationType: cultivationTypeObj,
-        machine: machineObj,
+        growingPeriod: existingGrowingPeriod, // Associate the existing growing period
+        cultivationType,
+        machine: existingMachine,
       });
 
-      await this.cultivationRepository.save(cultivation);
+      const createdCultivation =
+        await this.cultivationRepository.save(cultivation);
 
-      // Return the created field
-      return cultivation;
+      // Return the created cultivation
+      return createdCultivation;
     } catch (error) {
       console.error(
         "Error creating cultivation with growing_period, cultivation_type, and machine:",
@@ -95,41 +98,33 @@ export class CultivationService {
     }
   }
 
-  //   // transformField and transformSoil -- use for findAllWithSoil and findById
-  //   private transformField(field: Field): Field {
-  //     return {
-  //       id: field.id,
-  //       name: field.name,
-  //       polygons: field.polygons,
-  //       created: field.created,
-  //       updated: field.updated,
-  //       deleted: field.deleted,
-  //       soil: field.soil ? this.transformSoil(field.soil) : null,
-  //       farm: field.farm,
-  //     };
-  //   }
+  // transformField and transformSoil -- use for findAllWithSoil and findById
+  private transformCultivation(cultivationObj: Cultivation) {
+    return {
+      id: cultivationObj.id,
+      date: cultivationObj.date,
+      created: cultivationObj.created,
+      updated: cultivationObj.updated,
+      deleted: cultivationObj.deleted,
+      growingPeriod: cultivationObj.growingPeriod,
+      machine: cultivationObj.machine,
+      cultivationType: cultivationObj.cultivationType,
+    };
+  }
 
-  //   private transformSoil(soil: Soil): Soil {
-  //     return {
-  //       id: soil.id,
-  //       name: soil.name,
-  //       created: soil.created,
-  //       updated: soil.updated,
-  //       deleted: soil.deleted,
-  //       fields: soil.fields || [],
-  //     };
-  //   }
+  async findAllWithAttributes() {
+    const cultivations = await this.cultivationRepository
+      .createQueryBuilder("cultivation")
+      .leftJoinAndSelect("cultivation.growingPeriod", "growingPeriod")
+      .leftJoinAndSelect("cultivation.machine", "machine")
+      .leftJoinAndSelect("cultivation.cultivationType", "cultivationType")
+      .where("cultivation.deleted IS NULL")
+      .getMany();
 
-  //   async findAllWithSoil() {
-  //     const fields = await this.fieldRepository
-  //       .createQueryBuilder("field")
-  //       .leftJoinAndSelect("field.soil", "soil")
-  //       .leftJoinAndSelect("field.farm", "farm")
-  //       .where("field.deleted IS NULL")
-  //       .getMany();
-
-  //     return fields.map((field) => this.transformField(field));
-  //   }
+    return cultivations.map((cultivation) =>
+      this.transformCultivation(cultivation),
+    );
+  }
 
   //   async findById(id: string): Promise<Field> {
   //     try {

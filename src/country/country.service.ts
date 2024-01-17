@@ -9,7 +9,6 @@ import { validate } from "class-validator";
 import { Country } from "./country.entity";
 import { CreateCountryDto } from "./dtos/create-country.dto";
 import { UpdateCountryDto } from "./dtos/update-country.dto";
-import { EntityNotFoundError } from "typeorm/error/EntityNotFoundError";
 import { UserRole } from "../auth/dtos/role.enum";
 
 @Injectable()
@@ -18,17 +17,17 @@ export class CountryService {
     @InjectRepository(Country) private countryRepository: Repository<Country>,
   ) {}
 
-  async createCountry(createCropDto: CreateCountryDto): Promise<Country> {
-    const errors = await validate(createCropDto);
+  async createCountry(createCountryDto: CreateCountryDto): Promise<Country> {
+    const errors = await validate(createCountryDto);
 
     if (errors.length > 0) {
       throw new BadRequestException(errors);
     }
 
     try {
-      const { name } = createCropDto;
-      const newCrop = this.countryRepository.create({ name });
-      return await this.countryRepository.save(newCrop);
+      const { name } = createCountryDto;
+      const newCountry = this.countryRepository.create({ name });
+      return await this.countryRepository.save(newCountry);
     } catch (error) {
       throw new BadRequestException("Error creating Country: " + error.message);
     }
@@ -57,6 +56,16 @@ export class CountryService {
       .createQueryBuilder("country")
       .where("country.name = :name", { name })
       .getOne();
+  }
+
+  async findOneByName(name: string): Promise<Country> {
+    try {
+      const country = await this.countryRepository.findOne({ where: { name } });
+      return country;
+    } catch (error) {
+      console.error("Error fetching country by name:", error);
+      throw error;
+    }
   }
 
   async findById(id: string): Promise<Country> {
@@ -125,10 +134,6 @@ export class CountryService {
         message: `Successfully soft-deleted Country with id ${id} and name ${existingCountry.name}`,
       };
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new NotFoundException(`Country with id ${id} not found`);
-      }
-
       throw new NotFoundException(`Country with id ${id} not found`);
     }
   }
@@ -158,10 +163,6 @@ export class CountryService {
         message: `Successfully permanently deleted Country with id ${id} and name ${existingCountry.name}`,
       };
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new NotFoundException(`Country with id ${id} not found`);
-      }
-
       throw new NotFoundException(
         `Failed to permanently delete country with id ${id}`,
       );

@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EntityNotFoundError, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { validate } from "class-validator";
 import { Soil } from "./soil.entity";
 import { CreateSoilDto } from "./dtos/create-soil.dto";
@@ -17,19 +17,19 @@ export class SoilService {
     @InjectRepository(Soil) private soilRepository: Repository<Soil>,
   ) {}
 
-  async createSoil(createCropDto: CreateSoilDto): Promise<Soil> {
-    const errors = await validate(createCropDto);
+  async createSoil(createSoilDto: CreateSoilDto): Promise<Soil> {
+    const errors = await validate(createSoilDto);
 
     if (errors.length > 0) {
       throw new BadRequestException(errors);
     }
 
     try {
-      const { name } = createCropDto;
-      const newCrop = this.soilRepository.create({ name });
-      return await this.soilRepository.save(newCrop);
+      const { name } = createSoilDto;
+      const newSoil = this.soilRepository.create({ name });
+      return await this.soilRepository.save(newSoil);
     } catch (error) {
-      throw new BadRequestException("Error creating crop: " + error.message);
+      throw new BadRequestException("Error creating soil: " + error.message);
     }
   }
 
@@ -47,6 +47,16 @@ export class SoilService {
       return soil;
     } catch (error) {
       console.error("Error fetching soil:", error);
+      throw error;
+    }
+  }
+
+  async findOneByName(name: string): Promise<Soil> {
+    try {
+      const soil = await this.soilRepository.findOne({ where: { name } });
+      return soil;
+    } catch (error) {
+      console.error("Error fetching soil by name:", error);
       throw error;
     }
   }
@@ -105,10 +115,6 @@ export class SoilService {
         message: `Successfully soft-deleted Soil with id ${id} and name ${existingSoil.name}`,
       };
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new NotFoundException(`Soil with id ${id} not found`);
-      }
-
       throw new NotFoundException(`Soil with id ${id} not found`);
     }
   }
@@ -138,11 +144,6 @@ export class SoilService {
         message: `Successfully permanently deleted Soil with id ${id} and name ${existingSoil.name}`,
       };
     } catch (error) {
-      // Handle EntityNotFoundError specifically
-      if (error instanceof EntityNotFoundError) {
-        throw new NotFoundException(`Soil with id ${id} not found`);
-      }
-
       throw new NotFoundException(
         `Failed to permanently delete Soil with id ${id}`,
       );

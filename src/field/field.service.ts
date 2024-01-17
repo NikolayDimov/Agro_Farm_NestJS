@@ -1,18 +1,19 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EntityNotFoundError, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { Field } from "./field.entity";
 import { CreateFieldDto } from "./dtos/create-field.dto";
 import { CreateFieldOnlyDto } from "./dtos/create-field-only.dto";
 import { UpdateFieldDto } from "./dtos/update-field.dto";
 import { Soil } from "../soil/soil.entity";
 import { UserRole } from "../auth/dtos/role.enum";
+import { SoilService } from "../soil/soil.service";
 
 @Injectable()
 export class FieldService {
   constructor(
     @InjectRepository(Field) private fieldRepository: Repository<Field>,
-    @InjectRepository(Soil) private soilRepository: Repository<Soil>,
+    private soilService: SoilService,
   ) {}
 
   async createFieldOnly(
@@ -25,7 +26,8 @@ export class FieldService {
       boundary,
     });
 
-    return this.fieldRepository.save(newField);
+    const createdField = this.fieldRepository.save(newField);
+    return createdField;
   }
 
   async createFieldWithSoil(createFieldDto: CreateFieldDto): Promise<Field> {
@@ -33,14 +35,11 @@ export class FieldService {
       const { name, boundary, soilName } = createFieldDto;
 
       // Check if the soil exists
-      let soil = await this.soilRepository.findOne({
-        where: { name: soilName },
-      });
+      let soil = await this.soilService.findOneByName(soilName);
 
       // If the soil doesn't exist, create it
       if (!soil) {
-        soil = await this.soilRepository.create({ name: soilName });
-        await this.soilRepository.save(soil);
+        soil = await this.soilService.createSoil({ name: soilName });
       }
 
       // Create the field and associate it with the soil
@@ -50,10 +49,9 @@ export class FieldService {
         soil,
       });
 
-      await this.fieldRepository.save(field);
-
+      const createdField = await this.fieldRepository.save(field);
       // Return the created field
-      return field;
+      return createdField;
     } catch (error) {
       console.error("Error creating field with soil:", error);
       throw error;
@@ -71,9 +69,11 @@ export class FieldService {
       deleted: field.deleted,
       soil: field.soil ? this.transformSoil(field.soil) : null,
       farm: field.farm,
+      growingPeriods: field.growingPeriods,
     };
   }
 
+  //The transformSoil function allows selectively include or exclude certain properties of the Soil entity in the transformed output.
   private transformSoil(soil: Soil): Soil {
     return {
       id: soil.id,
@@ -94,6 +94,16 @@ export class FieldService {
       .getMany();
 
     return fields.map((field) => this.transformField(field));
+  }
+
+  async findOne(id: string): Promise<Field> {
+    const existingFieldId = await this.fieldRepository.findOneBy({ id });
+    return existingFieldId;
+  }
+
+  async findOneById(id: string): Promise<Field> {
+    const existingField = await this.fieldRepository.findOne({ where: { id } });
+    return existingField;
   }
 
   async findById(id: string): Promise<Field> {
@@ -132,16 +142,15 @@ export class FieldService {
       // If soilName is provided, update the field's soil
       if (updateFieldDto.soilName) {
         // Check if the new soil exists
-        let newSoil = await this.soilRepository.findOne({
-          where: { name: updateFieldDto.soilName },
-        });
+        let newSoil = await this.soilService.findOneByName(
+          updateFieldDto.soilName, // Corrected from soilName to updateFieldDto.soilName
+        );
 
         // If the new soil doesn't exist, create it
         if (!newSoil) {
-          newSoil = await this.soilRepository.create({
+          newSoil = await this.soilService.createSoil({
             name: updateFieldDto.soilName,
           });
-          await this.soilRepository.save(newSoil);
         }
 
         // Update the field's's soil
@@ -177,17 +186,19 @@ export class FieldService {
     id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
-      const field = await this.fieldRepository.findOneBy({ id });
+      const existingField = await this.fieldRepository.findOneBy({ id });
 
-      const { name } = field;
+      if (!existingField) {
+        throw new NotFoundException(`Field with id ${id} not found`);
+      }
 
-      // Soft delete by setting the "deleted" property
-      field.deleted = new Date();
-      await this.fieldRepository.save(field);
+      // Soft delete using the softDelete method
+      await this.fieldRepository.softDelete({ id });
+
       return {
         id,
-        name,
-        message: `Successfully deleted Field with id ${id} and name ${name}`,
+        name: existingField.name,
+        message: `Successfully soft-deleted Field with id ${id} and name ${existingField.name}`,
       };
     } catch (error) {
       throw new NotFoundException(`Field with id ${id} not found`);
@@ -219,10 +230,6 @@ export class FieldService {
         message: `Successfully permanently deleted Field with id ${id} and name ${existingField.name}`,
       };
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new NotFoundException(`Field with id ${id} not found`);
-      }
-
       throw new NotFoundException(
         `Failed to permanently delete Field with id ${id}`,
       );

@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EntityNotFoundError, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { validate } from "class-validator";
 import { Machine } from "./machine.entity";
 import { CreateMachineDto } from "./dtos/create-machine.dto";
@@ -34,6 +34,39 @@ export class MachineService {
       return await this.machineRepository.save(newMachine);
     } catch (error) {
       throw new BadRequestException("Error creating crop: " + error.message);
+    }
+  }
+
+  async findOneByName(
+    brand: string,
+    model: string,
+    registerNumber: string,
+  ): Promise<Machine> {
+    try {
+      const machineName = await this.machineRepository.findOne({
+        where: { brand, model, registerNumber },
+      });
+      return machineName;
+    } catch (error) {
+      console.error("Error fetching machine type by name:", error);
+      throw error;
+    }
+  }
+
+  async findOneById(id: string): Promise<Machine | undefined> {
+    try {
+      // const existingMachine = await this.machineRepository.findOne({
+      //   where: { id },
+      // });
+      const existingMachine = await this.machineRepository.findOneBy({ id });
+
+      if (!existingMachine) {
+        throw new NotFoundException(`Machine with ID ${id} not found`);
+      }
+
+      return existingMachine;
+    } catch (error) {
+      throw new NotFoundException(`Machine with ID ${id} not found`);
     }
   }
 
@@ -114,18 +147,23 @@ export class MachineService {
     message: string;
   }> {
     try {
-      const machine = await this.machineRepository.findOneBy({ id });
+      const existingMachine = await this.machineRepository.findOneBy({ id });
 
-      const { brand, model, registerNumber } = machine;
-      // Soft delete by setting the "deleted" property
-      machine.deleted = new Date();
-      await this.machineRepository.save(machine);
+      if (!existingMachine) {
+        throw new NotFoundException(`Machine with id ${id} not found`);
+      }
+
+      const { brand, model, registerNumber } = existingMachine;
+
+      // Soft delete using the softDelete method
+      await this.machineRepository.softDelete({ id });
+
       return {
         id,
         brand,
         model,
         registerNumber,
-        message: `Successfully deleted Machine with id ${id} and brand ${brand}`,
+        message: `Successfully soft-deleted Machine with id ${id}, Brand ${brand}, Model ${model} and Register Number ${registerNumber}`,
       };
     } catch (error) {
       throw new NotFoundException(`Machine with id ${id} not found`);
@@ -164,14 +202,9 @@ export class MachineService {
         brand,
         model,
         registerNumber,
-        message: `Successfully permanently deleted Machine with id ${id} and name ${brand}`,
+        message: `Successfully permanently deleted Machine with id ${id}, Brand ${brand}, Model ${model} and Register Number ${registerNumber}`,
       };
     } catch (error) {
-      console.error("Error during deletion:", error);
-      if (error instanceof EntityNotFoundError) {
-        throw new NotFoundException(`Machine with id ${id} not found`);
-      }
-
       throw new NotFoundException(
         `Failed to permanently delete machine with id ${id}`,
       );

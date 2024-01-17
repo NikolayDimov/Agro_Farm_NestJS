@@ -9,5 +9,6 @@ import { SoilModule } from "../soil/soil.module";
   imports: [TypeOrmModule.forFeature([Field]), SoilModule],
   controllers: [FieldController],
   providers: [FieldService],
+  exports: [TypeOrmModule.forFeature([Field]), FieldService],
 })
 export class FieldModule {}

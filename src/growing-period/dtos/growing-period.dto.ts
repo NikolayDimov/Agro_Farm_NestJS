@@ -8,7 +8,10 @@ export class GrowingPeriodDto {
   id: string;
 
   @Expose()
-  date: Date;
+  startDate: Date;
+
+  @Expose()
+  endDate: Date;
 
   @Expose()
   @IsUUID()

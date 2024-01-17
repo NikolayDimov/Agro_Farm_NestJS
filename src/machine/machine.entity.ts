@@ -7,8 +7,10 @@ import {
   DeleteDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from "typeorm";
 import { Farm } from "../farm/farm.entity";
+import { Cultivation } from "../cultivation/cultivation.entity";
 
 @Entity()
 export class Machine {
@@ -27,6 +29,9 @@ export class Machine {
   @ManyToOne(() => Farm, (farm) => farm.id)
   @JoinColumn({ name: "farm_id" })
   farm: Farm;
+
+  @OneToMany(() => Cultivation, (cultivation) => cultivation.machine)
+  cultivations: Cultivation[];
 
   @CreateDateColumn({ type: "timestamp", name: "created_at" })
   created: Date;

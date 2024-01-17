@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EntityNotFoundError, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { validate } from "class-validator";
 import { Crop } from "./crop.entity";
 import { CreateCropDto } from "./dtos/create-crop.dto";
@@ -58,6 +58,11 @@ export class CropService {
       .getOne();
   }
 
+  async findOne(id: string): Promise<Crop> {
+    const existingCropId = await this.cropRepository.findOneBy({ id });
+    return existingCropId;
+  }
+
   async findById(id: string): Promise<Crop> {
     try {
       const crop = await this.cropRepository
@@ -96,17 +101,19 @@ export class CropService {
     id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
-      // findOneOrFail expects an object with a "where" property
-      const crop = await this.cropRepository.findOneBy({ id });
+      const existingCrop = await this.cropRepository.findOneBy({ id });
 
-      const { name } = crop;
-      // Soft delete by setting the "deleted" property
-      crop.deleted = new Date();
-      await this.cropRepository.save(crop);
+      if (!existingCrop) {
+        throw new NotFoundException(`Crop with id ${id} not found`);
+      }
+
+      // Soft delete using the softDelete method
+      await this.cropRepository.softDelete({ id });
+
       return {
         id,
-        name,
-        message: `Successfully deleted Crop with id ${id} and name ${name}`,
+        name: existingCrop.name,
+        message: `Successfully soft-deleted Farm with id ${id} and name ${existingCrop.name}`,
       };
     } catch (error) {
       throw new NotFoundException(`Crop with id ${id} not found`);
@@ -138,10 +145,6 @@ export class CropService {
         message: `Successfully permanently deleted Crop with id ${id} and name ${existingCrop.name}`,
       };
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new NotFoundException(`Country with id ${id} not found`);
-      }
-
       throw new NotFoundException(
         `Failed to permanently delete country with id ${id}`,
       );

@@ -5,8 +5,8 @@ import {
   NotFoundException,
   // ExecutionContext,
 } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+// import { InjectRepository } from "@nestjs/typeorm";
+// import { Repository } from "typeorm";
 import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
 import { randomBytes, scrypt as _scrypt } from "crypto";
@@ -23,7 +23,6 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
   async signUp(user: CreateUserDto) {
@@ -92,16 +91,15 @@ export class AuthService {
   async updateUserRole(updateUserRoleDto: UpdateUserRoleDto): Promise<User> {
     const { userId, newRole } = updateUserRoleDto;
 
-    const existingUser = await this.userRepository.findOne({
-      where: { id: userId },
-    });
+    const existingUser = await this.usersService.findOneById(userId);
 
     if (!existingUser) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
     existingUser.role = newRole;
-    await this.userRepository.save(existingUser);
+    //await this.usersService.create(existingUser);
+    await this.usersService.update(existingUser);
 
     return existingUser;
   }
