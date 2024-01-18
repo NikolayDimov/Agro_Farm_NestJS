@@ -10,7 +10,6 @@ import { Country } from "./country.entity";
 import { CreateCountryDto } from "./dtos/create-country.dto";
 import { UpdateCountryDto } from "./dtos/update-country.dto";
 import { UserRole } from "../auth/dtos/role.enum";
-import { CreateCountryIdDto } from "./dtos/create-countryId.dto";
 
 @Injectable()
 export class CountryService {
@@ -27,20 +26,6 @@ export class CountryService {
 
     const { name } = createCountryDto;
     const newCountry = this.countryRepository.create({ name });
-    return await this.countryRepository.save(newCountry);
-  }
-
-  async createCountryWithId(
-    createCountryIdDto: CreateCountryIdDto,
-  ): Promise<Country> {
-    const errors = await validate(createCountryIdDto);
-
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
-    }
-
-    const { id } = createCountryIdDto;
-    const newCountry = this.countryRepository.create({ id });
     return await this.countryRepository.save(newCountry);
   }
 

@@ -7,7 +7,7 @@ class LocationDto {
   coordinates: [number, number];
 }
 
-export class CreateFarmDto {
+export class CreateFarmCountryNameDto {
   @IsNotEmpty({ message: "Name cannot be empty" })
   @IsString({ message: "Name must be a string" })
   name: string;

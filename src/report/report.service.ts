@@ -36,4 +36,13 @@ export class ReportService {
       occurrences: report.occurrences,
     }));
   }
+
+  async generateCultivationReport(): Promise<any[]> {
+    try {
+      return await this.cultivationService.generateCultivationReport();
+    } catch (error) {
+      console.error("Error generating cultivation report:", error);
+      throw new Error("Failed to generate cultivation report");
+    }
+  }
 }

@@ -8,7 +8,7 @@ import { Repository } from "typeorm";
 import { Field } from "./field.entity";
 import { CreateFieldDto } from "./dtos/create-field.dto";
 import { CreateFieldOnlyDto } from "./dtos/create-field-only.dto";
-import { UpdateFieldDto } from "./dtos/update-field.dto";
+import { UpdateFieldSoilNameDto } from "./dtos/update-field.dto";
 import { Soil } from "../soil/soil.entity";
 import { UserRole } from "../auth/dtos/role.enum";
 import { SoilService } from "../soil/soil.service";
@@ -73,11 +73,11 @@ export class FieldService {
     const { name, boundary, soilId, farmId } = createFieldWithSoilIdDto;
 
     // Check if the soil exists
-    let soil = await this.soilService.findOne(soilId);
+    const soil = await this.soilService.findOne(soilId);
 
     // If the soil doesn't exist, create it
     if (!soil) {
-      soil = await this.soilService.createSoilId({ id: soilId });
+      throw new BadRequestException(`No soil found with ID: ${soilId}`);
     }
 
     const farm = await this.farmService.findOneById(farmId);
@@ -164,7 +164,7 @@ export class FieldService {
 
   async updateField(
     id: string,
-    updateFieldDto: UpdateFieldDto,
+    updateFieldDto: UpdateFieldSoilNameDto,
   ): Promise<Field> {
     // console.log("Received ID:", id);
     const field = await this.fieldRepository.findOne({

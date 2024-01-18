@@ -10,7 +10,6 @@ import { Soil } from "./soil.entity";
 import { CreateSoilDto } from "./dtos/create-soil.dto";
 import { UpdateSoilDto } from "./dtos/update-soil.dto";
 import { UserRole } from "../auth/dtos/role.enum";
-import { CreateSoilIdDto } from "./dtos/create-soilId.dto";
 
 @Injectable()
 export class SoilService {
@@ -27,18 +26,6 @@ export class SoilService {
 
     const { name } = createSoilDto;
     const newSoil = this.soilRepository.create({ name });
-    return await this.soilRepository.save(newSoil);
-  }
-
-  async createSoilId(createSoilIdDto: CreateSoilIdDto): Promise<Soil> {
-    const errors = await validate(createSoilIdDto);
-
-    if (errors.length > 0) {
-      throw new BadRequestException(errors);
-    }
-
-    const { id } = createSoilIdDto;
-    const newSoil = this.soilRepository.create({ id });
     return await this.soilRepository.save(newSoil);
   }
 

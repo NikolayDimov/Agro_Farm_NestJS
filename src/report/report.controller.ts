@@ -36,4 +36,14 @@ export class ReportController {
       return { success: false, message: error.message };
     }
   }
+
+  @Get("/cultivationReport")
+  async generateCultivationReport() {
+    try {
+      return await this.reportService.generateCultivationReport();
+    } catch (error) {
+      console.error("Error generating cultivation report:", error);
+      return { success: false, message: error.message };
+    }
+  }
 }

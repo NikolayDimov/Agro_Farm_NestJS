@@ -2,13 +2,14 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Farm } from "./farm.entity";
-import { CreateFarmDto } from "./dtos/create-farm.dto";
+import { CreateFarmCountryNameDto } from "./dtos/create-farm-countryName.dto";
 import { CreateFarmOnlyDto } from "./dtos/create-farm-only.dto";
-import { UpdateFarmDto } from "./dtos/update-farm.dto";
+import { UpdateFarmCountryNameDto } from "./dtos/update-farm-countryName.dto";
 import { Country } from "../country/country.entity";
 import { UserRole } from "../auth/dtos/role.enum";
 import { CountryService } from "../country/country.service";
 import { CreateFarmCountryIdDto } from "./dtos/create-farm-countryId.dto";
+import { UpdateFarmCountryIdDto } from "./dtos/update-farm-countryId.dto";
 
 @Injectable()
 export class FarmService {
@@ -18,13 +19,37 @@ export class FarmService {
   ) {}
 
   async createFarmOnly(createFarmOnlyDto: CreateFarmOnlyDto): Promise<Farm> {
-    const { name } = createFarmOnlyDto;
-    const newFarm = this.farmRepository.create({ name });
+    const { name, location } = createFarmOnlyDto;
+    if (
+      !location ||
+      !location.coordinates ||
+      location.coordinates.length !== 2 ||
+      !location.coordinates.every((coord) => typeof coord === "number")
+    ) {
+      throw new Error("Invalid coordinates provided");
+    }
+
+    // Create a GeoJSON Point object for the location
+    const locationObject = {
+      type: "Point",
+      coordinates: location.coordinates,
+    };
+
+    // Serialize the GeoJSON Point to a JSON string
+    const locationString = JSON.stringify(locationObject);
+
+    const newFarm = this.farmRepository.create({
+      name,
+      location: locationString, // Set the location property
+    });
+
     return this.farmRepository.save(newFarm);
   }
 
-  async createFarmWithCountry(createFarmDto: CreateFarmDto): Promise<Farm> {
-    const { name, countryName, location } = createFarmDto;
+  async createFarmWithCountry(
+    CreateFarmCountryNameDto: CreateFarmCountryNameDto,
+  ): Promise<Farm> {
+    const { name, countryName, location } = CreateFarmCountryNameDto;
     if (
       !location ||
       !location.coordinates ||
@@ -166,34 +191,66 @@ export class FarmService {
     return this.transformFarm(farm);
   }
 
-  async updateFarm(id: string, updateFarmDto: UpdateFarmDto): Promise<Farm> {
+  async updateFarmCountryName(
+    id: string,
+    updateFarmCountryNameDto: UpdateFarmCountryNameDto,
+  ): Promise<Farm> {
     // Find the farm by ID
     const farm = await this.farmRepository.findOne({
       where: { id },
       relations: ["country"],
     });
     // If countryName is provided, update the farm's country
-    if (updateFarmDto.countryName) {
+    if (updateFarmCountryNameDto.countryName) {
       // Check if the new country exists
       let newCountry = await this.countryService.findOneByName(
-        updateFarmDto.countryName,
+        updateFarmCountryNameDto.countryName,
       );
       // If the new country doesn't exist, create it
       if (!newCountry) {
         newCountry = await this.countryService.createCountry({
-          name: updateFarmDto.countryName,
+          name: updateFarmCountryNameDto.countryName,
         });
       }
       // Update the farm's country
       farm.country = newCountry;
     }
     // Update farm
-    if (updateFarmDto.name) {
-      farm.name = updateFarmDto.name;
+    if (updateFarmCountryNameDto.name) {
+      farm.name = updateFarmCountryNameDto.name;
     }
     // Save the updated farm
     const updatedFarm = await this.farmRepository.save(farm);
     return updatedFarm;
+  }
+
+  async updateFarmCountryId(
+    id: string,
+    updateFarmCountryIdDto: UpdateFarmCountryIdDto,
+  ): Promise<Farm> {
+    // console.log("Received ID:", id);
+    const existingfarm = await this.farmRepository.findOne({
+      where: { id },
+      relations: ["country"],
+    });
+
+    if (updateFarmCountryIdDto.countryId) {
+      const newCountry = await this.countryService.findOne(
+        updateFarmCountryIdDto.countryId,
+      );
+
+      existingfarm.country = newCountry;
+    }
+
+    if (updateFarmCountryIdDto.name) {
+      existingfarm.name = updateFarmCountryIdDto.name;
+    }
+
+    const updatedFarmCountryIdDto =
+      await this.farmRepository.save(existingfarm);
+
+    // console.log("Updated Field:", updatedField);
+    return updatedFarmCountryIdDto;
   }
 
   async deleteFarmOnlyById(

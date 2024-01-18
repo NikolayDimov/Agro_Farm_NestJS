@@ -9,14 +9,15 @@ import {
   Delete,
   NotFoundException,
 } from "@nestjs/common";
-import { CreateFarmDto } from "./dtos/create-farm.dto";
+import { CreateFarmCountryNameDto } from "./dtos/create-farm-countryName.dto";
 import { CreateFarmOnlyDto } from "./dtos/create-farm-only.dto";
-import { UpdateFarmDto } from "./dtos/update-farm.dto";
+//import { UpdateFarmCountryNameDto } from "./dtos/update-farm-countryName.dto";
 import { FarmService } from "./farm.service";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorator/roles.decorator";
 import { UserRole } from "../auth/dtos/role.enum";
 import { CreateFarmCountryIdDto } from "./dtos/create-farm-countryId.dto";
+import { UpdateFarmCountryIdDto } from "./dtos/update-farm-countryId.dto";
 
 @Controller("farm")
 @UseGuards(RolesGuard)
@@ -38,7 +39,7 @@ export class FarmController {
   //Cteare Farm and create new Country. If there is no Country - create new Country. If there is a Country - select from existing Country
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("createFarmWithCountry")
-  async createFarmWithCountry(@Body() createFarmDto: CreateFarmDto) {
+  async createFarmWithCountry(@Body() createFarmDto: CreateFarmCountryNameDto) {
     try {
       const createdFarm =
         await this.farmService.createFarmWithCountry(createFarmDto);
@@ -94,14 +95,40 @@ export class FarmController {
     }
   }
 
+  // Update Farm with CountryName
+  // @Roles(UserRole.OWNER, UserRole.OPERATOR)
+  // @Patch(":id")
+  // async updateFarm(
+  //   @Param("id") id: string,
+  //   @Body() updateFarmCountryNameDto: UpdateFarmCountryNameDto,
+  // ) {
+  //   try {
+  //     const updatedFarm = await this.farmService.updateFarmCountryName(
+  //       id,
+  //       updateFarmCountryNameDto,
+  //     );
+  //     return { data: updatedFarm };
+  //   } catch (error) {
+  //     console.error("Error updating farm:", error);
+  //     if (error instanceof NotFoundException) {
+  //       return { error: "Farm not found" };
+  //     }
+  //     return { success: false, message: error.message };
+  //   }
+  // }
+
+  // Update Farm with CountryID
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateFarm(
     @Param("id") id: string,
-    @Body() updateFarmDto: UpdateFarmDto,
+    @Body() updateFarmCountryIdDto: UpdateFarmCountryIdDto,
   ) {
     try {
-      const updatedFarm = await this.farmService.updateFarm(id, updateFarmDto);
+      const updatedFarm = await this.farmService.updateFarmCountryId(
+        id,
+        updateFarmCountryIdDto,
+      );
       return { data: updatedFarm };
     } catch (error) {
       console.error("Error updating farm:", error);

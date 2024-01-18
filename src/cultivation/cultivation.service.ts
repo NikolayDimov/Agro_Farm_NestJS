@@ -270,4 +270,31 @@ export class CultivationService {
 
     return result;
   }
+
+  async generateCultivationReport(): Promise<CultivationReportDTO[]> {
+    const result: CultivationReportDTO[] = await this.cultivationRepository
+      .createQueryBuilder("cultivation")
+      .select([
+        "cultivation.date AS cultivationDate",
+        "cultivationType.name AS cultivationTypeName",
+        "field.name AS fieldName",
+        "machine.brand AS machineBrand",
+        "machine.model AS machineModel",
+        "crop.name AS cropName",
+        "soil.name AS soilName",
+        "farm.name AS farmName",
+      ])
+      .leftJoin("cultivation.growingPeriod", "growingPeriod")
+      .leftJoin("cultivation.cultivationType", "cultivationType")
+      .leftJoin("growingPeriod.field", "field")
+      .leftJoin("field.soil", "soil")
+      .leftJoin("field.farm", "farm")
+      .leftJoin("cultivation.machine", "machine")
+      .leftJoin("growingPeriod.crop", "crop")
+      .where("cultivation.deleted_at IS NULL")
+      .orderBy("cultivation.date", "ASC")
+      .getRawMany();
+
+    return result;
+  }
 }

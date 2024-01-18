@@ -1,5 +1,12 @@
-import { IsNotEmpty, IsString, Matches } from "class-validator";
-import { IsCoordinate } from "./coordinate.validator";
+import { IsNotEmpty, IsString, Matches, ValidateNested } from "class-validator";
+// import { IsCoordinate } from "./coordinate.validator";
+import { Type } from "class-transformer";
+
+class LocationDto {
+  @IsNotEmpty({ message: "Coordinates cannot be empty" })
+  @Type(() => Number)
+  coordinates: [number, number];
+}
 
 export class CreateFarmOnlyDto {
   @IsNotEmpty({ message: "Name cannot be empty" })
@@ -9,8 +16,7 @@ export class CreateFarmOnlyDto {
   })
   name: string;
 
-  @IsCoordinate({
-    message: "Location must be a valid coordinate (latitude,longitude)",
-  })
-  location: string;
+  @ValidateNested()
+  @Type(() => LocationDto)
+  location: LocationDto;
 }
