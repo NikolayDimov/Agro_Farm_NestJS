@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Post,
-  HttpCode,
-  HttpStatus,
   UseGuards,
   Get,
   Request,
@@ -22,7 +20,6 @@ import { Public } from "./decorator/public.decorator";
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @HttpCode(HttpStatus.OK)
   @Public()
   @Post("login")
   signIn(@Body() signInDto: SignInDto) {

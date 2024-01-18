@@ -1,4 +1,12 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Post,
+  Delete,
+  Param,
+  UseGuards,
+  NotFoundException,
+} from "@nestjs/common";
 import { Roles } from "../auth/decorator/roles.decorator";
 import { UserRole } from "../auth/dtos/role.enum";
 import { RolesGuard } from "src/auth/guards/roles.guard";
@@ -23,6 +31,21 @@ export class CultivationTypeController {
       console.error("Error creating cultivation type", error);
       const errorMessage = error?.response?.message || "An error occurred";
       return { error: errorMessage };
+    }
+  }
+
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
+  @Delete(":id")
+  async deleteMachineById(@Param("id") id: string): Promise<{
+    id: string;
+    name: string;
+    message: string;
+  }> {
+    try {
+      return this.cultivationTypeService.deleteCultivationTypeById(id);
+    } catch (error) {
+      console.error("Error deleting cultivation type:", error);
+      throw new NotFoundException("Failed to delete cultivation type");
     }
   }
 }

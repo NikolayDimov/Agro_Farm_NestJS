@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CultivationType } from "./cultivation-type.entity";
@@ -53,5 +57,39 @@ export class CultivationTypeService {
       where: { id },
       relations: options?.relations,
     });
+  }
+
+  async deleteCultivationTypeById(id: string): Promise<{
+    id: string;
+    name: string;
+    message: string;
+  }> {
+    const existingCultivationType =
+      await this.cultivationTypeRepository.findOne({
+        where: { id },
+        relations: ["cultivations"],
+      });
+
+    if (!existingCultivationType) {
+      throw new NotFoundException(`Machine with id ${id} not found`);
+    }
+
+    if (
+      existingCultivationType.cultivations &&
+      existingCultivationType.cultivations.length > 0
+    ) {
+      throw new BadRequestException(
+        "This Cultivation Type has associated cultivations. Cannot be soft deleted.",
+      );
+    }
+
+    // Soft delete using the softDelete method
+    await this.cultivationTypeRepository.softDelete({ id });
+
+    return {
+      id,
+      name: existingCultivationType.name,
+      message: `Successfully permanently deleted Cultivation type with id ${id}, name ${existingCultivationType.name}`,
+    };
   }
 }
