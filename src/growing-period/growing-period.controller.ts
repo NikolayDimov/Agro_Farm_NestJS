@@ -4,6 +4,8 @@ import {
   Body,
   Post,
   NotFoundException,
+  Delete,
+  Param,
 } from "@nestjs/common";
 import { CreateGrowingPeriodDto } from "./dtos/create-growing-period.dto";
 import { GrowingPeriodService } from "./growing-period.service";
@@ -24,6 +26,17 @@ export class GrowingPeriodController {
     } catch (error) {
       console.error("Error creating country", error);
       throw new NotFoundException("Failed to delete country");
+    }
+  }
+  @Delete(":id")
+  async deleteFieldById(
+    @Param("id") id: string,
+  ): Promise<{ id: string; message: string }> {
+    try {
+      return this.growingPeriodService.deleteGrowingPeriodById(id);
+    } catch (error) {
+      console.error("Error deleting growing period:", error);
+      throw new NotFoundException("Failed to delete growing period");
     }
   }
 }

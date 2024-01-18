@@ -105,6 +105,8 @@ export class MachineService {
     return machine;
   }
 
+  // Transfer machine guard to another farm, if machine participate in cultivation
+  // Work, and also can update machine brand, model, reg number
   async updateMachine(
     id: string,
     updateMachineDto: UpdateMachineDto,
@@ -155,6 +157,9 @@ export class MachineService {
     // Save and return the updated machine
     return await this.machineRepository.save(machine);
   }
+
+  // Transfer machine guard to another farm, if machine participate in cultivation
+  // Work, but also can't update machine brand, model, reg number
 
   // async updateMachine(
   //   id: string,

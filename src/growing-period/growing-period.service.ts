@@ -1,11 +1,14 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { GrowingPeriod } from "./growing-period.entity";
 import { CreateGrowingPeriodDto } from "./dtos/create-growing-period.dto";
 import { FieldService } from "../field/field.service";
 import { CropService } from "../crop/crop.service";
-//import { v4 as uuidv4 } from "uuid";
 
 @Injectable()
 export class GrowingPeriodService {
@@ -66,5 +69,36 @@ export class GrowingPeriodService {
       where: { id },
     });
     return existingField;
+  }
+
+  async deleteGrowingPeriodById(id: string): Promise<{
+    id: string;
+    message: string;
+  }> {
+    const existingGrowingPeriod = await this.growingPeriodRepository.findOne({
+      where: { id },
+      relations: ["cultivations"],
+    });
+
+    if (!existingGrowingPeriod) {
+      throw new NotFoundException(`Growing Period with id ${id} not found`);
+    }
+
+    if (
+      existingGrowingPeriod.cultivations &&
+      existingGrowingPeriod.cultivations.length > 0
+    ) {
+      throw new BadRequestException(
+        "This machine has associated cultivations. Cannot be soft deleted.",
+      );
+    }
+
+    // Soft delete using the softDelete method
+    await this.growingPeriodRepository.softDelete({ id });
+
+    return {
+      id,
+      message: `Successfully soft deleted Growing period with id ${id}`,
+    };
   }
 }
