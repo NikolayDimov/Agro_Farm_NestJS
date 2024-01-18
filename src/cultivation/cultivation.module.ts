@@ -16,5 +16,6 @@ import { CultivationService } from "./cultivation.service";
   ],
   controllers: [CultivationController],
   providers: [CultivationService],
+  exports: [TypeOrmModule.forFeature([Cultivation]), CultivationService],
 })
 export class CultivationModule {}

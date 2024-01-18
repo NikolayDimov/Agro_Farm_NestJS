@@ -8,12 +8,15 @@ import { Repository } from "typeorm";
 import { CultivationType } from "./cultivation-type.entity";
 import { validate } from "class-validator";
 import { CreateCultivationTypeDto } from "./dtos/create-cultivation-type.dto";
+// import { UpdateCultivationTypeDto } from "./dtos/update-cultivation-type.dto";
+// import { CultivationService } from "../cultivation/cultivation.service";
 
 @Injectable()
 export class CultivationTypeService {
   constructor(
     @InjectRepository(CultivationType)
     private cultivationTypeRepository: Repository<CultivationType>,
+    //private cultivationService: CultivationService,
   ) {}
 
   async createCultivationType(
@@ -58,6 +61,56 @@ export class CultivationTypeService {
       relations: options?.relations,
     });
   }
+
+  // async updateCultivationType(
+  //   id: string,
+  //   updateCultivationTypeDto: UpdateCultivationTypeDto,
+  // ): Promise<CultivationType> {
+  //   const existingCultivationType =
+  //     await this.cultivationTypeRepository.findOne({
+  //       where: { id },
+  //       relations: ["cultivations"],
+  //     });
+
+  //   if (
+  //     existingCultivationType.cultivations &&
+  //     existingCultivationType.cultivations.length > 0
+  //   ) {
+  //     // If there are associated cultivations, prevent changing the cultivationId
+  //     if (
+  //       updateCultivationTypeDto.cultivationId &&
+  //       updateCultivationTypeDto.cultivationId !==
+  //         existingCultivationType.cultivations[0].id
+  //     ) {
+  //       throw new BadRequestException(
+  //         "This cultivation type has associated cultivations. Cannot update the cultivationId.",
+  //       );
+  //     }
+  //   }
+
+  //   // Update other fields if provided
+  //   if (updateCultivationTypeDto.name !== undefined) {
+  //     existingCultivationType.name = updateCultivationTypeDto.name;
+  //   }
+
+  //   // If the user provided a cultivationId, validate and update the cultivation
+  //   if (updateCultivationTypeDto.cultivationId) {
+  //     const cultivation = await this.cultivationService.findOne(
+  //       updateCultivationTypeDto.cultivationId,
+  //     );
+
+  //     if (!cultivation) {
+  //       throw new BadRequestException(
+  //         "No cultivation found with the provided cultivationId",
+  //       );
+  //     }
+
+  //     existingCultivationType.cultivations = [cultivation]; // Assign as an array
+  //   }
+
+  //   // Save and return the updated cultivation type
+  //   return await this.cultivationTypeRepository.save(existingCultivationType);
+  // }
 
   async deleteCultivationTypeById(id: string): Promise<{
     id: string;

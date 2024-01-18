@@ -9,6 +9,7 @@ import { GrowingPeriod } from "./growing-period.entity";
 import { CreateGrowingPeriodDto } from "./dtos/create-growing-period.dto";
 import { FieldService } from "../field/field.service";
 import { CropService } from "../crop/crop.service";
+//import { getManager } from "typeorm";
 
 @Injectable()
 export class GrowingPeriodService {

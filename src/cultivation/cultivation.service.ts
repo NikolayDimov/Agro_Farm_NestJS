@@ -82,6 +82,20 @@ export class CultivationService {
     return createdCultivation;
   }
 
+  async findOne(
+    id: string,
+    options?: { relations?: string[] },
+  ): Promise<Cultivation> {
+    if (!id) {
+      return null;
+    }
+
+    return await this.cultivationRepository.findOne({
+      where: { id },
+      relations: options?.relations,
+    });
+  }
+
   // transformField and transformSoil -- use for findAllWithSoil and findById
   private transformCultivation(cultivationObj: Cultivation) {
     return {
@@ -229,5 +243,23 @@ export class CultivationService {
       machine,
       message: `Successfully soft deleted cultivation with id ${id}`,
     };
+  }
+
+  async getCultivationsWithMostCommonSoilTypePerFarm() {
+    const result = await this.cultivationRepository
+      .createQueryBuilder("cultivation")
+      .select("farm.name", "farmName")
+      .addSelect("field.soil", "mostCommonSoilType")
+      .addSelect("soil.name", "soilName")
+      .addSelect("COUNT(cultivation.id)", "occurrences")
+      .leftJoin("cultivation.growingPeriod", "growingPeriod")
+      .leftJoin("growingPeriod.field", "field")
+      .leftJoin("field.farm", "farm")
+      .leftJoin("field.soil", "soil")
+      .groupBy("farm.name, field.soil, soil.name")
+      .orderBy("occurrences", "DESC")
+      .getRawMany();
+
+    return result;
   }
 }

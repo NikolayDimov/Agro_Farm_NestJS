@@ -239,4 +239,41 @@ export class FarmService {
       message: `Successfully permanently deleted Farm with id ${id} and name ${existingFarm.name}`,
     };
   }
+
+  // Farm with mmost machines
+  async getFarmsWithMostMachines() {
+    const result = await this.farmRepository
+      .createQueryBuilder("farm")
+      .leftJoinAndSelect("farm.machines", "machines")
+      .select([
+        "farm.id as farmId",
+        "farm.name as farmName",
+        "COUNT(DISTINCT machines.id) as machineCount",
+      ])
+      .groupBy("farm.id, farm.name")
+      .orderBy("machineCount", "DESC")
+      .limit(10)
+      .getRawMany();
+
+    return result;
+  }
+
+  async getFieldsPerFarmAndCrop(): Promise<
+    { farmName: string; cropName: string; fieldCount: number }[]
+  > {
+    const query = `
+      SELECT
+        farm.name AS farmName,
+        crop.name AS cropName,
+        COUNT(field.id) AS fieldCount
+      FROM farm AS farm
+      LEFT JOIN field AS field ON farm.id = field.farm_id
+      LEFT JOIN growing_period AS growing_period ON field.id = growing_period.field_id
+      LEFT JOIN crop AS crop ON growing_period.crop_id = crop.id
+      GROUP BY farm.name, crop.name
+    `;
+
+    const fieldsPerFarmAndCrop = await this.farmRepository.query(query);
+    return fieldsPerFarmAndCrop;
+  }
 }

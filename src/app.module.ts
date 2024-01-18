@@ -18,6 +18,7 @@ import { CultivationTypeModule } from "./cultivation-type/cultivation-type.modul
 import { GrowingPeriodModule } from "./growing-period/growing-period.module";
 import { MachineModule } from "./machine/machine.module";
 import { CropModule } from "./crop/crop.module";
+import { ReportModule } from "./report/report.module";
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { CropModule } from "./crop/crop.module";
     GrowingPeriodModule,
     MachineModule,
     CropModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [

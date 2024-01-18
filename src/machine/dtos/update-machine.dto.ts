@@ -1,8 +1,6 @@
-import { Expose } from "class-transformer";
 import { IsString, IsNotEmpty, Matches, IsUUID } from "class-validator";
 
 export class UpdateMachineDto {
-  @Expose()
   @IsString()
   @IsNotEmpty({ message: "Name cannot be empty" })
   @IsString({ message: "Name must be a string" })
@@ -11,7 +9,6 @@ export class UpdateMachineDto {
   })
   brand: string;
 
-  @Expose()
   @IsString()
   @IsNotEmpty({ message: "Name cannot be empty" })
   @IsString({ message: "Name must be a string" })
@@ -20,7 +17,6 @@ export class UpdateMachineDto {
   })
   model: string;
 
-  @Expose()
   @IsString()
   @IsNotEmpty({ message: "Name cannot be empty" })
   @IsString({ message: "Name must be a string" })
