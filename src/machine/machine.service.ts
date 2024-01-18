@@ -80,6 +80,7 @@ export class MachineService {
   async findAll(): Promise<Machine[]> {
     const machine = await this.machineRepository
       .createQueryBuilder("machine")
+      .leftJoinAndSelect("machine.farm", "farm")
       .andWhere("machine.deleted IS NULL")
       .getMany();
 
@@ -108,7 +109,21 @@ export class MachineService {
     id: string,
     updateMachineDto: UpdateMachineDto,
   ): Promise<Machine> {
-    const machine = await this.machineRepository.findOneBy({ id });
+    const machine = await this.machineRepository.findOne({
+      where: { id },
+      relations: ["cultivations"],
+    });
+
+    if (!machine) {
+      throw new NotFoundException(`Machine with ID ${id} not found`);
+    }
+
+    // Check if there are associated cultivations
+    if (machine.cultivations && machine.cultivations.length > 0) {
+      throw new BadRequestException(
+        "This machine has associated cultivations. Cannot update the farm.",
+      );
+    }
 
     if (
       updateMachineDto.brand ||
@@ -128,6 +143,16 @@ export class MachineService {
       }
     }
 
+    if (updateMachineDto.farmId) {
+      const farm = await this.farmService.findOne(updateMachineDto.farmId);
+
+      if (!farm) {
+        throw new BadRequestException("No farm found with the provided farmId");
+      }
+
+      machine.farm = farm;
+    }
+
     return await this.machineRepository.save(machine);
   }
 
@@ -138,23 +163,33 @@ export class MachineService {
     registerNumber: string;
     message: string;
   }> {
-    const existingMachine = await this.machineRepository.findOneBy({ id });
+    const existingMachine = await this.machineRepository.findOne({
+      where: { id },
+      relations: ["cultivations"],
+    });
 
     if (!existingMachine) {
       throw new NotFoundException(`Machine with id ${id} not found`);
     }
 
-    const { brand, model, registerNumber } = existingMachine;
+    if (
+      existingMachine.cultivations &&
+      existingMachine.cultivations.length > 0
+    ) {
+      throw new BadRequestException(
+        "This machine has associated cultivations. Cannot be soft deleted.",
+      );
+    }
 
     // Soft delete using the softDelete method
     await this.machineRepository.softDelete({ id });
 
     return {
       id,
-      brand,
-      model,
-      registerNumber,
-      message: `Successfully soft-deleted Machine with id ${id}, Brand ${brand}, Model ${model} and Register Number ${registerNumber}`,
+      brand: existingMachine.brand,
+      model: existingMachine.model,
+      registerNumber: existingMachine.registerNumber,
+      message: `Successfully permanently deleted Machine with id ${id}, Brand ${existingMachine.brand}, Model ${existingMachine.model} and Register Number ${existingMachine.registerNumber}`,
     };
   }
 
@@ -168,8 +203,10 @@ export class MachineService {
     registerNumber: string;
     message: string;
   }> {
-    const existingMachine = await this.machineRepository.findOneBy({ id });
-    const { brand, model, registerNumber } = existingMachine;
+    const existingMachine = await this.machineRepository.findOne({
+      where: { id },
+      relations: ["cultivations"],
+    });
     // console.log("Found machine:", existingMachine);
 
     if (!existingMachine) {
@@ -180,16 +217,25 @@ export class MachineService {
     if (userRole !== UserRole.OWNER) {
       throw new NotFoundException("User does not have the required role");
     }
+    // Check if there are associated cultivations
+    if (
+      existingMachine.cultivations &&
+      existingMachine.cultivations.length > 0
+    ) {
+      throw new BadRequestException(
+        "This machine has associated cultivations. Cannot be permanently deleted.",
+      );
+    }
 
     // Perform the permanent delete
     await this.machineRepository.remove(existingMachine);
 
     return {
       id,
-      brand,
-      model,
-      registerNumber,
-      message: `Successfully permanently deleted Machine with id ${id}, Brand ${brand}, Model ${model} and Register Number ${registerNumber}`,
+      brand: existingMachine.brand,
+      model: existingMachine.model,
+      registerNumber: existingMachine.registerNumber,
+      message: `Successfully permanently deleted Machine with id ${id}, Brand ${existingMachine.brand}, Model ${existingMachine.model} and Register Number ${existingMachine.registerNumber}`,
     };
   }
 }

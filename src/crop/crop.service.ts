@@ -80,10 +80,19 @@ export class CropService {
   async deleteCropById(
     id: string,
   ): Promise<{ id: string; name: string; message: string }> {
-    const existingCrop = await this.cropRepository.findOneBy({ id });
+    const existingCrop = await this.cropRepository.findOne({
+      where: { id },
+      relations: ["growingPeriods"],
+    });
 
     if (!existingCrop) {
       throw new NotFoundException(`Crop with id ${id} not found`);
+    }
+
+    if (existingCrop.growingPeriods && existingCrop.growingPeriods.length > 0) {
+      throw new BadRequestException(
+        "This crop has associated growingPeriods. Cannot be soft deleted.",
+      );
     }
 
     // Soft delete using the softDelete method
@@ -100,10 +109,19 @@ export class CropService {
     id: string,
     userRole: UserRole,
   ): Promise<{ id: string; name: string; message: string }> {
-    const existingCrop = await this.cropRepository.findOneBy({ id });
+    const existingCrop = await this.cropRepository.findOne({
+      where: { id },
+      relations: ["growingPeriods"],
+    });
 
     if (!existingCrop) {
       throw new NotFoundException(`Crop with id ${id} not found`);
+    }
+
+    if (existingCrop.growingPeriods && existingCrop.growingPeriods.length > 0) {
+      throw new BadRequestException(
+        "This crop has associated growingPeriods. Cannot be soft deleted.",
+      );
     }
 
     // Check if the user has the necessary role (OWNER) to perform the permanent delete

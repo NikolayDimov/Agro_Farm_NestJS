@@ -166,40 +166,33 @@ export class FieldService {
     updateFieldDto: UpdateFieldDto,
   ): Promise<Field> {
     // console.log("Received ID:", id);
-    // Find the field by ID
     const field = await this.fieldRepository.findOne({
       where: { id },
       relations: ["soil"],
     });
 
-    // If soilName is provided, update the field's soil
     if (updateFieldDto.soilName) {
-      // Check if the new soil exists
       let newSoil = await this.soilService.findOneByName(
-        updateFieldDto.soilName, // Corrected from soilName to updateFieldDto.soilName
+        updateFieldDto.soilName,
       );
 
-      // If the new soil doesn't exist, create it
       if (!newSoil) {
         newSoil = await this.soilService.createSoil({
           name: updateFieldDto.soilName,
         });
       }
 
-      // Update the field's's soil
       field.soil = newSoil;
     }
 
-    // Update field'name
     if (updateFieldDto.name) {
       field.name = updateFieldDto.name;
     }
-    // Update the fields'boundary
+
     if (updateFieldDto.boundary) {
       field.boundary = updateFieldDto.boundary;
     }
 
-    // Save the updated field
     const updatedField = await this.fieldRepository.save(field);
 
     // console.log("Updated Field:", updatedField);

@@ -1,5 +1,5 @@
 import { Expose } from "class-transformer";
-import { IsString, IsNotEmpty, Matches } from "class-validator";
+import { IsString, IsNotEmpty, Matches, IsUUID } from "class-validator";
 
 export class UpdateMachineDto {
   @Expose()
@@ -28,4 +28,7 @@ export class UpdateMachineDto {
     message: "Name must contain only letters and numbers",
   })
   registerNumber: string;
+
+  @IsUUID()
+  farmId: string;
 }
