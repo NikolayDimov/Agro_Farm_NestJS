@@ -7,7 +7,7 @@ import {
   Body,
   NotFoundException,
   Param,
-  //Delete,
+  Delete,
 } from "@nestjs/common";
 import { CreateCultivationDto } from "./dtos/create-cultivation.dto";
 import { UpdateCultivationDto } from "./dtos/update-cultivation.dto";
@@ -15,6 +15,9 @@ import { CultivationService } from "./cultivation.service";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorator/roles.decorator";
 import { UserRole } from "../auth/dtos/role.enum";
+import { CultivationType } from "../cultivation-type/cultivation-type.entity";
+import { GrowingPeriod } from "../growing-period/growing-period.entity";
+import { Machine } from "../machine/machine.entity";
 
 @Controller("cultivation")
 @UseGuards(RolesGuard)
@@ -74,6 +77,7 @@ export class CultivationController {
     }
   }
 
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateField(
     @Param("id") id: string,
@@ -97,15 +101,21 @@ export class CultivationController {
     }
   }
 
-  //   @Delete(":id")
-  //   async deleteFieldById(
-  //     @Param("id") id: string,
-  //   ): Promise<{ id: string; name: string; message: string }> {
-  //     try {
-  //       return this.fieldService.deleteFieldById(id);
-  //     } catch (error) {
-  //       console.error("Error deleting field:", error);
-  //       throw new NotFoundException("Failed to delete field");
-  //     }
-  //   }
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
+  @Delete(":id")
+  async deleteFieldById(@Param("id") id: string): Promise<{
+    id: string;
+    date: Date;
+    growingPeriod: GrowingPeriod[];
+    cultivationType: CultivationType[];
+    machine: Machine[];
+    message: string;
+  }> {
+    try {
+      return this.cultivationService.deleteCultivationById(id);
+    } catch (error) {
+      console.error("Error deleting cultivation:", error);
+      throw new NotFoundException("Failed to delete cultivation");
+    }
+  }
 }

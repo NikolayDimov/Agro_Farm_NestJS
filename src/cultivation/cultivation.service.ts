@@ -11,6 +11,9 @@ import { UpdateCultivationDto } from "./dtos/update-cultivation.dto";
 import { GrowingPeriodService } from "../growing-period/growing-period.service";
 import { CultivationTypeService } from "../cultivation-type/cultivation-type.service";
 import { MachineService } from "../machine/machine.service";
+import { CultivationType } from "../cultivation-type/cultivation-type.entity";
+import { GrowingPeriod } from "../growing-period/growing-period.entity";
+import { Machine } from "../machine/machine.entity";
 
 @Injectable()
 export class CultivationService {
@@ -182,25 +185,49 @@ export class CultivationService {
     return await this.cultivationRepository.save(existingCultivation);
   }
 
-  //   async deleteFieldById(
-  //     id: string,
-  //   ): Promise<{ id: string; name: string; message: string }> {
-  //     try {
-  //       // findOneOrFail expects an object with a "where" property
-  //       const field = await this.fieldRepository.findOneOrFail({ where: { id } });
+  async deleteCultivationById(id: string): Promise<{
+    id: string;
+    date: Date;
+    growingPeriod: GrowingPeriod[];
+    cultivationType: CultivationType[];
+    machine: Machine[];
+    message: string;
+  }> {
+    const existingCultivation = await this.cultivationRepository.findOne({
+      where: { id },
+      relations: ["growingPeriod", "cultivationType", "machine"],
+    });
 
-  //       const { name } = field;
+    if (!existingCultivation) {
+      throw new NotFoundException(`Cultivation with id ${id} not found`);
+    }
 
-  //       // Soft delete by setting the "deleted" property
-  //       field.deleted = new Date();
-  //       await this.fieldRepository.save(field);
-  //       return {
-  //         id,
-  //         name,
-  //         message: `Successfully deleted Field with id ${id} and name ${name}`,
-  //       };
-  //     } catch (error) {
-  //       throw new NotFoundException(`Field with id ${id} not found`);
-  //     }
-  //   }
+    const growingPeriod: GrowingPeriod[] = (existingCultivation.growingPeriod ??
+      []) as GrowingPeriod[];
+    const cultivationType: CultivationType[] =
+      (existingCultivation.cultivationType ?? []) as CultivationType[];
+    const machine: Machine[] = (existingCultivation.machine ?? []) as Machine[];
+
+    if (
+      growingPeriod.length > 0 ||
+      cultivationType.length > 0 ||
+      machine.length > 0
+    ) {
+      throw new BadRequestException(
+        "This Cultivation has associated growingPeriod, cultivationType, or machine. Cannot be soft deleted.",
+      );
+    }
+
+    // Soft delete using the softDelete method
+    await this.cultivationRepository.softDelete({ id });
+
+    return {
+      id,
+      date: existingCultivation.deleted || new Date(), // Use deleted instead of date
+      growingPeriod,
+      cultivationType,
+      machine,
+      message: `Successfully soft deleted cultivation with id ${id}`,
+    };
+  }
 }
