@@ -16,6 +16,7 @@ import { FieldService } from "./field.service";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorator/roles.decorator";
 import { UserRole } from "../auth/dtos/role.enum";
+import { CreateFieldWithSoilIdDto } from "./dtos/create-fieldWithSoilId.dto";
 
 @Controller("field")
 @UseGuards(RolesGuard)
@@ -41,6 +42,22 @@ export class FieldController {
     try {
       const createdField =
         await this.fieldService.createFieldWithSoil(createFieldDto);
+      return { data: createdField };
+    } catch (error) {
+      console.error("Error creating field eith soil:", error);
+      return { success: false, message: error.message };
+    }
+  }
+
+  @Roles(UserRole.OWNER, UserRole.OPERATOR)
+  @Post("createFieldWithSoilId")
+  async createFieldWithSoilId(
+    @Body() createFieldWithSoilIdDto: CreateFieldWithSoilIdDto,
+  ) {
+    try {
+      const createdField = await this.fieldService.createFieldWithSoilId(
+        createFieldWithSoilIdDto,
+      );
       return { data: createdField };
     } catch (error) {
       console.error("Error creating field eith soil:", error);

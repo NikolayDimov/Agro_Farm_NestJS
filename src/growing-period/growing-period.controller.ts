@@ -9,11 +9,11 @@ import { CreateGrowingPeriodDto } from "./dtos/create-growing-period.dto";
 import { GrowingPeriodService } from "./growing-period.service";
 import { GrowingPeriod } from "./growing-period.entity";
 
-@Controller("growing-periods")
+@Controller("growingPeriods")
 export class GrowingPeriodController {
   constructor(private growingPeriodService: GrowingPeriodService) {}
 
-  @Post("/createGP")
+  @Post("/createGrowingPeriod")
   async createGrowingPeriod(
     @Body(ValidationPipe) createGrowingPeriodDto: CreateGrowingPeriodDto,
   ): Promise<GrowingPeriod> {

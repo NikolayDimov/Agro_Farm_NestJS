@@ -1,10 +1,13 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Cultivation } from "./cultivation.entity";
 import { CreateCultivationDto } from "./dtos/create-cultivation.dto";
-import { CreateCultivationOnlyDto } from "./dtos/create-cultivation-only.dto";
-//import { UpdateCultivationDto } from "./dtos/update-cultivation.dto";
+import { UpdateCultivationDto } from "./dtos/update-cultivation.dto";
 import { GrowingPeriodService } from "../growing-period/growing-period.service";
 import { CultivationTypeService } from "../cultivation-type/cultivation-type.service";
 import { MachineService } from "../machine/machine.service";
@@ -18,16 +21,6 @@ export class CultivationService {
     private cultivationTypeService: CultivationTypeService,
     private machineService: MachineService,
   ) {}
-
-  async createCultivationOnly(
-    createCultivationOnlyDto: CreateCultivationOnlyDto,
-  ): Promise<Cultivation> {
-    const newCultivation = this.cultivationRepository.create({
-      date: createCultivationOnlyDto.date,
-    });
-
-    return this.cultivationRepository.save(newCultivation);
-  }
 
   async createCultivationWithAttributes(
     createCultivationDto: CreateCultivationDto,
@@ -61,9 +54,9 @@ export class CultivationService {
         `There is no machine type with id ${machineId}`,
       );
     }
-    console.log(machine);
-    console.log(growingPeriod);
-    console.log(cultivationType);
+    // console.log(machine);
+    // console.log(growingPeriod);
+    // console.log(cultivationType);
 
     if (machine.farm.id !== growingPeriod.field.farm.id) {
       throw new BadRequestException(
@@ -114,82 +107,80 @@ export class CultivationService {
     );
   }
 
-  //   async findById(id: string): Promise<Field> {
-  //     try {
-  //       const field = await this.fieldRepository
-  //         .createQueryBuilder("field")
-  //         .leftJoinAndSelect("field.soil", "soil")
-  //         .leftJoinAndSelect("field.farm", "farm")
-  //         .andWhere("field.id = :id", { id })
-  //         .andWhere("field.deleted IS NULL")
-  //         .getOne();
+  async findById(id: string): Promise<Cultivation> {
+    const cultivation = await this.cultivationRepository
+      .createQueryBuilder("cultivation")
+      .leftJoinAndSelect("cultivation.growingPeriod", "growingPeriod")
+      .leftJoinAndSelect("cultivation.machine", "machine")
+      .leftJoinAndSelect("cultivation.cultivationType", "cultivationType")
+      .andWhere("cultivation.id = :id", { id })
+      .andWhere("cultivation.deleted IS NULL")
+      .getOne();
 
-  //       if (!field) {
-  //         throw new NotFoundException(`Field with ID ${id} not found`);
-  //       }
+    if (!cultivation) {
+      throw new NotFoundException(`Cultivation with ID ${id} not found`);
+    }
 
-  //       return this.transformField(field);
-  //     } catch (error) {
-  //       console.error("Error fetching field by ID:", error);
-  //       throw error;
-  //     }
-  //   }
+    return this.transformCultivation(cultivation);
+  }
 
-  //   async updateField(
-  //     id: string,
-  //     updateFieldDto: UpdateFieldDto,
-  //   ): Promise<Field> {
-  //     try {
-  //       // console.log("Received ID:", id);
-  //       // Find the field by ID
-  //       const field = await this.fieldRepository.findOneOrFail({
-  //         where: { id },
-  //         relations: ["soil"],
-  //       });
+  async updateCultivation(
+    id: string,
+    updateCultivationDto: UpdateCultivationDto,
+  ): Promise<Cultivation> {
+    const existingCultivation = await this.cultivationRepository.findOne({
+      where: { id },
+      relations: [
+        "growingPeriod",
+        "growingPeriod.field",
+        "growingPeriod.crop",
+        "cultivationType",
+        "machine",
+      ],
+    });
 
-  //       // If soilName is provided, update the field's soil
-  //       if (updateFieldDto.soilName) {
-  //         // Check if the new soil exists
-  //         let newSoil = await this.soilRepository.findOne({
-  //           where: { name: updateFieldDto.soilName },
-  //         });
+    if (updateCultivationDto.date) {
+      existingCultivation.date = updateCultivationDto.date;
+    }
 
-  //         // If the new soil doesn't exist, create it
-  //         if (!newSoil) {
-  //           newSoil = await this.soilRepository.create({
-  //             name: updateFieldDto.soilName,
-  //           });
-  //           await this.soilRepository.save(newSoil);
-  //         }
+    if (updateCultivationDto.growingPeriodId) {
+      const growingPeriodId = await this.growingPeriodService.findOne(
+        updateCultivationDto.growingPeriodId,
+      );
 
-  //         // Update the field's's soil
-  //         field.soil = newSoil;
-  //       }
+      if (!growingPeriodId) {
+        throw new BadRequestException("No growingPeriodId found");
+      }
 
-  //       // Update field'name
-  //       if (updateFieldDto.name) {
-  //         field.name = updateFieldDto.name;
-  //       }
-  //       // Update the fields'polygons
-  //       if (updateFieldDto.polygons) {
-  //         field.polygons = updateFieldDto.polygons;
-  //       }
+      existingCultivation.growingPeriod = growingPeriodId;
+    }
 
-  //       // Save the updated field
-  //       const updatedField = await this.fieldRepository.save(field);
+    if (updateCultivationDto.cultivationTypeId) {
+      const cultivationTypeId = await this.cultivationTypeService.findOne(
+        updateCultivationDto.cultivationTypeId,
+      );
 
-  //       // console.log("Updated Field:", updatedField);
-  //       return updatedField;
-  //     } catch (error) {
-  //       console.error("Error updating field:", error);
+      if (!cultivationTypeId) {
+        throw new BadRequestException("No cultivationTypeId found");
+      }
 
-  //       if (error instanceof NotFoundException) {
-  //         throw new NotFoundException(`Field with ID ${id} not found`);
-  //       }
+      existingCultivation.cultivationType = cultivationTypeId;
+    }
 
-  //       throw new Error("An error occurred while updating the field");
-  //     }
-  //   }
+    if (updateCultivationDto.machineId) {
+      const machineId = await this.machineService.findOne(
+        updateCultivationDto.machineId,
+      );
+
+      if (!machineId) {
+        throw new BadRequestException("No machineId found");
+      }
+
+      existingCultivation.machine = machineId;
+    }
+
+    return await this.cultivationRepository.save(existingCultivation);
+  }
 
   //   async deleteFieldById(
   //     id: string,

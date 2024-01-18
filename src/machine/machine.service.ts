@@ -109,40 +109,39 @@ export class MachineService {
     id: string,
     updateMachineDto: UpdateMachineDto,
   ): Promise<Machine> {
+    // Fetch the existing machine with associated data
     const machine = await this.machineRepository.findOne({
       where: { id },
-      relations: ["cultivations"],
+      relations: ["cultivations", "farm"],
     });
-
-    if (!machine) {
-      throw new NotFoundException(`Machine with ID ${id} not found`);
-    }
 
     // Check if there are associated cultivations
     if (machine.cultivations && machine.cultivations.length > 0) {
-      throw new BadRequestException(
-        "This machine has associated cultivations. Cannot update the farm.",
-      );
-    }
-
-    if (
-      updateMachineDto.brand ||
-      updateMachineDto.model ||
-      updateMachineDto.registerNumber
-    ) {
-      if (updateMachineDto.brand) {
-        machine.brand = updateMachineDto.brand;
-      }
-
-      if (updateMachineDto.model) {
-        machine.model = updateMachineDto.model;
-      }
-
-      if (updateMachineDto.registerNumber) {
-        machine.registerNumber = updateMachineDto.registerNumber;
+      // If there are associated cultivations, prevent changing the farmId
+      if (
+        updateMachineDto.farmId &&
+        updateMachineDto.farmId !== machine.farm.id
+      ) {
+        throw new BadRequestException(
+          "This machine has associated cultivations. Cannot update the farm.",
+        );
       }
     }
 
+    // Update other fields if provided
+    if (updateMachineDto.brand !== undefined) {
+      machine.brand = updateMachineDto.brand;
+    }
+
+    if (updateMachineDto.model !== undefined) {
+      machine.model = updateMachineDto.model;
+    }
+
+    if (updateMachineDto.registerNumber !== undefined) {
+      machine.registerNumber = updateMachineDto.registerNumber;
+    }
+
+    // If the user provided a farmId, validate and update the farm
     if (updateMachineDto.farmId) {
       const farm = await this.farmService.findOne(updateMachineDto.farmId);
 
@@ -153,8 +152,59 @@ export class MachineService {
       machine.farm = farm;
     }
 
+    // Save and return the updated machine
     return await this.machineRepository.save(machine);
   }
+
+  // async updateMachine(
+  //   id: string,
+  //   updateMachineDto: UpdateMachineDto,
+  // ): Promise<Machine> {
+  //   const machine = await this.machineRepository.findOne({
+  //     where: { id },
+  //     relations: ["cultivations", "farm"],
+  //   });
+
+  //   if (!machine) {
+  //     throw new NotFoundException(`Machine with ID ${id} not found`);
+  //   }
+
+  //   if (machine.cultivations && machine.cultivations.length > 0) {
+  //     throw new BadRequestException(
+  //       "This machine has associated cultivations. Cannot update the farm.",
+  //     );
+  //   }
+
+  //   if (updateMachineDto.farmId) {
+  //     const farm = await this.farmService.findOne(updateMachineDto.farmId);
+
+  //     if (!farm) {
+  //       throw new BadRequestException("No farm found with the provided farmId");
+  //     }
+
+  //     machine.farm = farm;
+  //   }
+
+  //   if (
+  //     updateMachineDto.brand ||
+  //     updateMachineDto.model ||
+  //     updateMachineDto.registerNumber
+  //   ) {
+  //     if (updateMachineDto.brand) {
+  //       machine.brand = updateMachineDto.brand;
+  //     }
+
+  //     if (updateMachineDto.model) {
+  //       machine.model = updateMachineDto.model;
+  //     }
+
+  //     if (updateMachineDto.registerNumber) {
+  //       machine.registerNumber = updateMachineDto.registerNumber;
+  //     }
+  //   }
+
+  //   return await this.machineRepository.save(machine);
+  // }
 
   async deleteMachineById(id: string): Promise<{
     id: string;

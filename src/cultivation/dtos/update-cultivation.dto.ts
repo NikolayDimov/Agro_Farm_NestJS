@@ -1,24 +1,19 @@
-import { IsNotEmpty, IsString, Matches, IsUUID } from "class-validator";
+import { IsNotEmpty, IsDateString, IsUUID } from "class-validator";
 
 export class UpdateCultivationDto {
-  @IsNotEmpty({ message: "Name cannot be empty" })
+  @IsNotEmpty({ message: "Date cannot be empty" })
+  @IsDateString()
   date: Date;
 
   @IsNotEmpty()
   @IsUUID()
-  growingPeriod: string;
+  growingPeriodId: string;
 
   @IsNotEmpty()
-  @IsString()
-  @Matches(/^[A-Za-z0-9\s]+$/, {
-    message: "Cultivation Type name must contain only letters and numbers",
-  })
-  cultivationType: string;
+  @IsUUID()
+  cultivationTypeId: string;
 
   @IsNotEmpty()
-  @IsString()
-  @Matches(/^[A-Za-z0-9\s]+$/, {
-    message: "Machine brand and model must contain only letters and numbers",
-  })
-  machine: string;
+  @IsUUID()
+  machineId: string;
 }
