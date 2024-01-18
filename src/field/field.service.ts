@@ -14,6 +14,7 @@ import { UserRole } from "../auth/dtos/role.enum";
 import { SoilService } from "../soil/soil.service";
 import { FarmService } from "../farm/farm.service";
 import { CreateFieldWithSoilIdDto } from "./dtos/create-fieldWithSoilId.dto";
+import { UpdateFieldSoilIdDto } from "./dtos/update-fieldSoilId.dto";
 
 @Injectable()
 export class FieldService {
@@ -197,6 +198,42 @@ export class FieldService {
 
     // console.log("Updated Field:", updatedField);
     return updatedField;
+  }
+
+  async updateFieldSoilId(
+    id: string,
+    updateFieldSoilIdDto: UpdateFieldSoilIdDto,
+  ): Promise<Field> {
+    // console.log("Received ID:", id);
+    const field = await this.fieldRepository.findOne({
+      where: { id },
+      relations: ["soil"],
+    });
+
+    if (updateFieldSoilIdDto.soilId) {
+      let newSoil = await this.soilService.findOne(updateFieldSoilIdDto.soilId);
+
+      if (!newSoil) {
+        newSoil = await this.soilService.createSoil({
+          name: updateFieldSoilIdDto.soilId,
+        });
+      }
+
+      field.soil = newSoil;
+    }
+
+    if (updateFieldSoilIdDto.name) {
+      field.name = updateFieldSoilIdDto.name;
+    }
+
+    if (updateFieldSoilIdDto.boundary) {
+      field.boundary = updateFieldSoilIdDto.boundary;
+    }
+
+    const updatedFieldSoilId = await this.fieldRepository.save(field);
+
+    // console.log("Updated Field:", updatedField);
+    return updatedFieldSoilId;
   }
 
   async deleteFieldById(

@@ -11,12 +11,13 @@ import {
 } from "@nestjs/common";
 import { CreateFieldDto } from "./dtos/create-field.dto";
 import { CreateFieldOnlyDto } from "./dtos/create-field-only.dto";
-import { UpdateFieldDto } from "./dtos/update-field.dto";
+//import { UpdateFieldDto } from "./dtos/update-field.dto";
 import { FieldService } from "./field.service";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorator/roles.decorator";
 import { UserRole } from "../auth/dtos/role.enum";
 import { CreateFieldWithSoilIdDto } from "./dtos/create-fieldWithSoilId.dto";
+import { UpdateFieldSoilIdDto } from "./dtos/update-fieldSoilId.dto";
 
 @Controller("field")
 @UseGuards(RolesGuard)
@@ -87,18 +88,36 @@ export class FieldController {
     }
   }
 
+  // @Roles(UserRole.OWNER, UserRole.OPERATOR)
+  // @Patch(":id")
+  // async updateField(
+  //   @Param("id") id: string,
+  //   @Body() updateFieldDto: UpdateFieldDto,
+  // ) {
+  //   try {
+  //     const updatedField = await this.fieldService.updateField(
+  //       id,
+  //       updateFieldDto,
+  //     );
+  //     return { data: updatedField };
+  //   } catch (error) {
+  //     console.error("Error updating field:", error);
+  //     return { success: false, message: error.message };
+  //   }
+  // }
+
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
-  async updateField(
+  async updateFieldSoilId(
     @Param("id") id: string,
-    @Body() updateFieldDto: UpdateFieldDto,
+    @Body() updateFieldSoilIdDto: UpdateFieldSoilIdDto,
   ) {
     try {
-      const updatedField = await this.fieldService.updateField(
+      const updatedFieldSoilId = await this.fieldService.updateFieldSoilId(
         id,
-        updateFieldDto,
+        updateFieldSoilIdDto,
       );
-      return { data: updatedField };
+      return { data: updatedFieldSoilId };
     } catch (error) {
       console.error("Error updating field:", error);
       return { success: false, message: error.message };
