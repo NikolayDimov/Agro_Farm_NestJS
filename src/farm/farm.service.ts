@@ -241,7 +241,9 @@ export class FarmService {
   }
 
   // Farm with mmost machines
-  async getFarmsWithMostMachines() {
+  async getFarmsWithMostMachines(): Promise<
+    { farmId: string; farmName: string; machineCount: number }[]
+  > {
     const result = await this.farmRepository
       .createQueryBuilder("farm")
       .leftJoinAndSelect("farm.machines", "machines")
@@ -258,22 +260,23 @@ export class FarmService {
     return result;
   }
 
+  // Count of fields per farm and crop
   async getFieldsPerFarmAndCrop(): Promise<
     { farmName: string; cropName: string; fieldCount: number }[]
   > {
-    const query = `
-      SELECT
-        farm.name AS farmName,
-        crop.name AS cropName,
-        COUNT(field.id) AS fieldCount
-      FROM farm AS farm
-      LEFT JOIN field AS field ON farm.id = field.farm_id
-      LEFT JOIN growing_period AS growing_period ON field.id = growing_period.field_id
-      LEFT JOIN crop AS crop ON growing_period.crop_id = crop.id
-      GROUP BY farm.name, crop.name
-    `;
+    const fieldsPerFarmAndCrop = await this.farmRepository
+      .createQueryBuilder("farm")
+      .leftJoin("farm.fields", "field")
+      .leftJoin("field.growingPeriods", "growingPeriod")
+      .leftJoin("growingPeriod.crop", "crop")
+      .select([
+        "farm.name AS farmName",
+        "crop.name AS cropName",
+        "COUNT(DISTINCT field.id) AS fieldCount",
+      ])
+      .groupBy("farm.name, crop.name")
+      .getRawMany();
 
-    const fieldsPerFarmAndCrop = await this.farmRepository.query(query);
     return fieldsPerFarmAndCrop;
   }
 }

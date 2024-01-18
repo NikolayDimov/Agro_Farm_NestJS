@@ -7,16 +7,31 @@ export class ReportController {
 
   @Get("/farmsWithMostMachines")
   async getFarmsWithMostMachines() {
-    return this.reportService.getFarmsWithMostMachines();
+    try {
+      return await this.reportService.getFarmsWithMostMachines();
+    } catch (error) {
+      console.error("Error fetching all machines:", error);
+      return { success: false, message: error.message };
+    }
   }
 
   @Get("/fieldCountPerFarmCrop")
   async generateFieldsPerFarmAndCropReport() {
-    return this.reportService.generateFieldsPerFarmAndCropReport();
+    try {
+      return await this.reportService.generateFieldsPerFarmAndCropReport();
+    } catch (error) {
+      console.error("Error fetching all machines:", error);
+      return { success: false, message: error.message };
+    }
   }
 
   @Get("/mostCommonSoilTypePerFarm")
   async getMostCommonSoilTypePerFarm() {
-    return this.reportService.getMostCommonSoilTypePerFarm();
+    try {
+      return await this.reportService.getMostCommonSoilTypePerFarm();
+    } catch (error) {
+      console.error("Error fetching all machines:", error);
+      return { success: false, message: error.message };
+    }
   }
 }

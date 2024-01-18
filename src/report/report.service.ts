@@ -27,7 +27,7 @@ export class ReportService {
 
   async getMostCommonSoilTypePerFarm() {
     const result =
-      await this.cultivationService.getCultivationsWithMostCommonSoilTypePerFarm();
+      await this.cultivationService.getMostCommonFielddSoilTypePerFarm();
 
     return result.map((report) => ({
       farmName: report.farmName,

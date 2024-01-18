@@ -245,7 +245,15 @@ export class CultivationService {
     };
   }
 
-  async getCultivationsWithMostCommonSoilTypePerFarm() {
+  // Most common field soil type (texture) per farm
+  async getMostCommonFielddSoilTypePerFarm(): Promise<
+    {
+      farmName: string;
+      mostCommonSoilType: string;
+      soilName: string;
+      occurrences: number;
+    }[]
+  > {
     const result = await this.cultivationRepository
       .createQueryBuilder("cultivation")
       .select("farm.name", "farmName")
