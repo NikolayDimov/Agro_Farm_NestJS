@@ -27,7 +27,7 @@ export class ReportService {
 
   async getMostCommonSoilTypePerFarm() {
     const result =
-      await this.cultivationService.getMostCommonFielddSoilTypePerFarm();
+      await this.cultivationService.getMostCommonFieldSoilTypePerFarm();
 
     return result.map((report) => ({
       farmName: report.farmName,
@@ -37,7 +37,7 @@ export class ReportService {
     }));
   }
 
-  async generateCultivationReport(): Promise<any[]> {
+  async generateCultivationReport(): Promise<CultivationReportDTO[]> {
     try {
       return await this.cultivationService.generateCultivationReport();
     } catch (error) {

@@ -246,7 +246,7 @@ export class CultivationService {
   }
 
   // Most common field soil type (texture) per farm
-  async getMostCommonFielddSoilTypePerFarm(): Promise<
+  async getMostCommonFieldSoilTypePerFarm(): Promise<
     {
       farmName: string;
       mostCommonSoilType: string;
