@@ -8,6 +8,7 @@ import {
   Body,
   Param,
   NotFoundException,
+  ParseUUIDPipe,
 } from "@nestjs/common";
 import { CreateSoilDto } from "./dtos/create-soil.dto";
 import { SoilService } from "./soil.service";
@@ -44,7 +45,7 @@ export class SoilController {
   }
 
   @Get(":id")
-  async getSoilById(@Param("id") id: string) {
+  async getSoilById(@Param("id", ParseUUIDPipe) id: string) {
     try {
       const soil = await this.soilService.findById(id);
       if (!soil) {
@@ -60,7 +61,7 @@ export class SoilController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateSoil(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() updateSoilDto: UpdateSoilDto,
   ) {
     try {
@@ -74,7 +75,7 @@ export class SoilController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
   async deleteSoilById(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       return this.soilService.deleteSoilById(id);
@@ -87,7 +88,7 @@ export class SoilController {
   @Roles(UserRole.OWNER)
   @Delete(":id/permanent")
   async permanentlyDeleteCountryByIdForOwner(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       const userRole = UserRole.OWNER;

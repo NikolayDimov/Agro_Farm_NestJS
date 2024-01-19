@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   Delete,
+  ParseUUIDPipe,
 } from "@nestjs/common";
 import { CreateCultivationDto } from "./dtos/create-cultivation.dto";
 import { UpdateCultivationDto } from "./dtos/update-cultivation.dto";
@@ -62,7 +63,7 @@ export class CultivationController {
   }
 
   @Get(":id")
-  async getCultivationById(@Param("id") id: string) {
+  async getCultivationById(@Param("id", ParseUUIDPipe) id: string) {
     try {
       const transformedField = await this.cultivationService.findById(id);
       return { data: transformedField };
@@ -80,7 +81,7 @@ export class CultivationController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateField(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() updateCultivationDto: UpdateCultivationDto,
   ) {
     try {
@@ -103,7 +104,7 @@ export class CultivationController {
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
-  async deleteFieldById(@Param("id") id: string): Promise<{
+  async deleteFieldById(@Param("id", ParseUUIDPipe) id: string): Promise<{
     id: string;
     date: Date;
     growingPeriod: GrowingPeriod[];

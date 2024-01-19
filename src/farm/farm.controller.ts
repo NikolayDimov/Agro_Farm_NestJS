@@ -8,6 +8,7 @@ import {
   Get,
   Delete,
   NotFoundException,
+  ParseUUIDPipe,
 } from "@nestjs/common";
 import { CreateFarmCountryNameDto } from "./dtos/create-farm-countryName.dto";
 import { CreateFarmOnlyDto } from "./dtos/create-farm-only.dto";
@@ -82,7 +83,7 @@ export class FarmController {
   }
 
   @Get(":id")
-  async getFarmById(@Param("id") id: string) {
+  async getFarmById(@Param("id", ParseUUIDPipe) id: string) {
     try {
       const transformedFarm = await this.farmService.findById(id);
       return { data: transformedFarm };
@@ -121,7 +122,7 @@ export class FarmController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateFarm(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() updateFarmCountryIdDto: UpdateFarmCountryIdDto,
   ) {
     try {
@@ -142,7 +143,7 @@ export class FarmController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
   async deleteFarmOnlyById(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       return this.farmService.deleteFarmOnlyById(id);
@@ -155,7 +156,7 @@ export class FarmController {
   @Roles(UserRole.OWNER)
   @Delete(":id/permanent")
   async permanentlyDeletefarmByIdForOwner(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       const userRole = UserRole.OWNER;

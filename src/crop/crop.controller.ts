@@ -8,6 +8,7 @@ import {
   Body,
   Param,
   NotFoundException,
+  ParseUUIDPipe,
 } from "@nestjs/common";
 import { CropService } from "./crop.service";
 import { CreateCropDto } from "./dtos/create-crop.dto";
@@ -43,7 +44,7 @@ export class CropController {
   }
 
   @Get(":id")
-  async getCropById(@Param("id") id: string) {
+  async getCropById(@Param("id", ParseUUIDPipe) id: string) {
     try {
       return this.cropService.findById(id);
     } catch (error) {
@@ -55,7 +56,7 @@ export class CropController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateCrop(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() updateCropDto: UpdateCropDto,
   ) {
     try {
@@ -69,7 +70,7 @@ export class CropController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
   async deleteCropById(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       return this.cropService.deleteCropById(id);
@@ -82,7 +83,7 @@ export class CropController {
   @Roles(UserRole.OWNER)
   @Delete(":id/permanent")
   async permanentlyDeleteCropByIdForOwner(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       const userRole = UserRole.OWNER;

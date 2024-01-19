@@ -8,6 +8,7 @@ import {
   Body,
   Param,
   NotFoundException,
+  ParseUUIDPipe,
 } from "@nestjs/common";
 import { CreateMachineDto } from "./dtos/create-machine.dto";
 import { MachineService } from "./machine.service";
@@ -44,7 +45,7 @@ export class MachineController {
   }
 
   @Get(":id")
-  async getMachineById(@Param("id") id: string) {
+  async getMachineById(@Param("id", ParseUUIDPipe) id: string) {
     try {
       const machine = await this.machineService.findById(id);
       if (!machine) {
@@ -61,7 +62,7 @@ export class MachineController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateMachine(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() updateMachineDto: UpdateMachineDto,
   ) {
     try {
@@ -74,7 +75,7 @@ export class MachineController {
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
-  async deleteMachineById(@Param("id") id: string): Promise<{
+  async deleteMachineById(@Param("id", ParseUUIDPipe) id: string): Promise<{
     id: string;
     brand: string;
     model: string;
@@ -91,7 +92,9 @@ export class MachineController {
 
   @Roles(UserRole.OWNER)
   @Delete(":id/permanent")
-  async permanentlyDeleteMachineByIdForOwner(@Param("id") id: string): Promise<{
+  async permanentlyDeleteMachineByIdForOwner(
+    @Param("id", ParseUUIDPipe) id: string,
+  ): Promise<{
     id: string;
     brand: string;
     model: string;

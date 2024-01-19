@@ -8,6 +8,7 @@ import {
   Body,
   Param,
   NotFoundException,
+  ParseUUIDPipe,
 } from "@nestjs/common";
 import { CountryService } from "./country.service";
 import { CreateCountryDto } from "./dtos/create-country.dto";
@@ -46,7 +47,7 @@ export class CountryController {
   }
 
   @Get(":id")
-  async getCountryById(@Param("id") id: string) {
+  async getCountryById(@Param("id", ParseUUIDPipe) id: string) {
     try {
       return this.countryService.findById(id);
     } catch (error) {
@@ -61,7 +62,7 @@ export class CountryController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateCountry(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() updateCountryDto: UpdateCountryDto,
   ) {
     try {
@@ -78,7 +79,7 @@ export class CountryController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
   async deleteCountryById(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       return this.countryService.deleteCountryById(id);
@@ -91,7 +92,7 @@ export class CountryController {
   @Roles(UserRole.OWNER)
   @Delete(":id/permanent")
   async permanentlyDeleteCountryByIdForOwner(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       const userRole = UserRole.OWNER;

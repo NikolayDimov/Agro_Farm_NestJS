@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   Delete,
+  ParseUUIDPipe,
 } from "@nestjs/common";
 import { CreateFieldDto } from "./dtos/create-field.dto";
 import { CreateFieldOnlyDto } from "./dtos/create-field-only.dto";
@@ -78,7 +79,7 @@ export class FieldController {
   }
 
   @Get(":id")
-  async getFieldById(@Param("id") id: string) {
+  async getFieldById(@Param("id", ParseUUIDPipe) id: string) {
     try {
       const transformedField = await this.fieldService.findById(id);
       return { data: transformedField };
@@ -109,7 +110,7 @@ export class FieldController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Patch(":id")
   async updateFieldSoilId(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
     @Body() updateFieldSoilIdDto: UpdateFieldSoilIdDto,
   ) {
     try {
@@ -127,7 +128,7 @@ export class FieldController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
   async deleteFieldById(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       return this.fieldService.deleteFieldById(id);
@@ -140,7 +141,7 @@ export class FieldController {
   @Roles(UserRole.OWNER)
   @Delete(":id/permanent")
   async permanentlyDeleteFieldByIdForOwner(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
     try {
       const userRole = UserRole.OWNER;

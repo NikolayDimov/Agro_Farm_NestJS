@@ -6,6 +6,7 @@ import {
   Param,
   UseGuards,
   NotFoundException,
+  ParseUUIDPipe,
   //Patch,
 } from "@nestjs/common";
 import { Roles } from "../auth/decorator/roles.decorator";
@@ -55,7 +56,7 @@ export class CultivationTypeController {
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
-  async deleteMachineById(@Param("id") id: string): Promise<{
+  async deleteMachineById(@Param("id", ParseUUIDPipe) id: string): Promise<{
     id: string;
     name: string;
     message: string;

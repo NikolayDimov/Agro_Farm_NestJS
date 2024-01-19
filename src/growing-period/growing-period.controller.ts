@@ -7,6 +7,7 @@ import {
   Delete,
   Param,
   UseGuards,
+  ParseUUIDPipe,
 } from "@nestjs/common";
 import { CreateGrowingPeriodDto } from "./dtos/create-growing-period.dto";
 import { GrowingPeriodService } from "./growing-period.service";
@@ -38,7 +39,7 @@ export class GrowingPeriodController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Delete(":id")
   async deleteFieldById(
-    @Param("id") id: string,
+    @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; message: string }> {
     try {
       return this.growingPeriodService.deleteGrowingPeriodById(id);
