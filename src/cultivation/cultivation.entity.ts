@@ -23,7 +23,7 @@ export class Cultivation {
   date: Date;
 
   @ManyToOne(() => GrowingPeriod, (growingPeriod) => growingPeriod.cultivations)
-  @JoinColumn({ name: "growing_crop_period_id" })
+  @JoinColumn({ name: "growing_period_id" })
   growingPeriod: GrowingPeriod;
 
   @ManyToOne(
