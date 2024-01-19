@@ -7,7 +7,6 @@ import {
   Delete,
   Body,
   Param,
-  NotFoundException,
   ParseUUIDPipe,
 } from "@nestjs/common";
 import { CropService } from "./crop.service";
@@ -25,32 +24,17 @@ export class CropController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("/createCrop")
   async createCrop(@Body() createCropDto: CreateCropDto) {
-    try {
-      return this.cropService.createCrop(createCropDto);
-    } catch (error) {
-      console.error("Error creating crop:", error);
-      return { success: false, message: error.message };
-    }
+    return this.cropService.createCrop(createCropDto);
   }
 
   @Get("getAll")
   async getAllCrops() {
-    try {
-      return this.cropService.findAll();
-    } catch (error) {
-      console.error("Error fetching all crops:", error);
-      return { success: false, message: error.message };
-    }
+    return this.cropService.findAll();
   }
 
   @Get(":id")
   async getCropById(@Param("id", ParseUUIDPipe) id: string) {
-    try {
-      return this.cropService.findById(id);
-    } catch (error) {
-      console.error("Error fetching crop by ID:", error);
-      return { success: false, message: error.message };
-    }
+    return this.cropService.findById(id);
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -59,12 +43,7 @@ export class CropController {
     @Param("id", ParseUUIDPipe) id: string,
     @Body() updateCropDto: UpdateCropDto,
   ) {
-    try {
-      return this.cropService.updateCrop(id, updateCropDto);
-    } catch (error) {
-      console.error("Error updating crop:", error);
-      return { success: false, message: error.message };
-    }
+    return this.cropService.updateCrop(id, updateCropDto);
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -72,12 +51,7 @@ export class CropController {
   async deleteCropById(
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
-    try {
-      return this.cropService.deleteCropById(id);
-    } catch (error) {
-      console.error("Error deleting crop:", error);
-      throw new NotFoundException("Failed to delete crop");
-    }
+    return this.cropService.deleteCropById(id);
   }
 
   @Roles(UserRole.OWNER)
@@ -85,13 +59,8 @@ export class CropController {
   async permanentlyDeleteCropByIdForOwner(
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
-    try {
-      const userRole = UserRole.OWNER;
+    const userRole = UserRole.OWNER;
 
-      return this.cropService.permanentlyDeleteCropByIdForOwner(id, userRole);
-    } catch (error) {
-      console.error("Error permanently deleting crop:", error);
-      throw new NotFoundException("Failed to permanently delete crop");
-    }
+    return this.cropService.permanentlyDeleteCropByIdForOwner(id, userRole);
   }
 }

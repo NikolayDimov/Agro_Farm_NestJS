@@ -4,7 +4,7 @@ import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { UsersModule } from "./users/users.module";
-import { APP_GUARD, APP_PIPE } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_PIPE } from "@nestjs/core";
 import { FarmModule } from "./farm/farm.module";
 import { CountryModule } from "./country/country.module";
 import { AuthModule } from "./auth/auth.module";
@@ -19,6 +19,7 @@ import { GrowingPeriodModule } from "./growing-period/growing-period.module";
 import { MachineModule } from "./machine/machine.module";
 import { CropModule } from "./crop/crop.module";
 import { ReportModule } from "./report/report.module";
+import { HttpExceptionFilter } from "./filters/HttpExceptionFilter";
 
 @Module({
   imports: [
@@ -48,6 +49,10 @@ import { ReportModule } from "./report/report.module";
       useValue: new ValidationPipe({
         whitelist: true,
       }),
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
     },
   ],
 })

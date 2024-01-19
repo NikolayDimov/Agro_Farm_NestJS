@@ -5,7 +5,6 @@ import {
   Post,
   Patch,
   Body,
-  NotFoundException,
   Param,
   Delete,
   ParseUUIDPipe,
@@ -31,51 +30,24 @@ export class CultivationController {
   async createCultivationWithAttributes(
     @Body() createCultivationDto: CreateCultivationDto,
   ) {
-    try {
-      const createdCultivation =
-        await this.cultivationService.createCultivationWithAttributes(
-          createCultivationDto,
-        );
-      return { data: createdCultivation };
-    } catch (error) {
-      console.error("Error creating cultivation with attributes:", error);
-      const errorMessage = error?.response?.message || "An error occurred";
-      return { error: errorMessage };
-    }
+    const createdCultivation =
+      await this.cultivationService.createCultivationWithAttributes(
+        createCultivationDto,
+      );
+    return { data: createdCultivation };
   }
 
   @Get("getAll")
   async getAllFields() {
-    try {
-      const transformedCultivation =
-        await this.cultivationService.findAllWithAttributes();
-      return { data: transformedCultivation };
-    } catch (error) {
-      console.error("Error fetching cultivation:", error);
-
-      if (error instanceof NotFoundException) {
-        return { error: "No fields found" };
-      }
-
-      const errorMessage = error?.response?.message || "An error occurred";
-      return { error: errorMessage };
-    }
+    const transformedCultivation =
+      await this.cultivationService.findAllWithAttributes();
+    return { data: transformedCultivation };
   }
 
   @Get(":id")
   async getCultivationById(@Param("id", ParseUUIDPipe) id: string) {
-    try {
-      const transformedField = await this.cultivationService.findById(id);
-      return { data: transformedField };
-    } catch (error) {
-      console.error("Error fetching field:", error);
-
-      if (error instanceof NotFoundException) {
-        return { error: "No field found" };
-      }
-
-      return { error: "An error occurred while fetching field" };
-    }
+    const transformedField = await this.cultivationService.findById(id);
+    return { data: transformedField };
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -84,22 +56,11 @@ export class CultivationController {
     @Param("id", ParseUUIDPipe) id: string,
     @Body() updateCultivationDto: UpdateCultivationDto,
   ) {
-    try {
-      const updatedCultivation =
-        await this.cultivationService.updateCultivation(
-          id,
-          updateCultivationDto,
-        );
-      return { data: updatedCultivation };
-    } catch (error) {
-      console.error("Error updating field:", error);
-
-      if (error instanceof NotFoundException) {
-        return { error: "Field not found" };
-      }
-
-      return { error: "An error occurred while updating the field" };
-    }
+    const updatedCultivation = await this.cultivationService.updateCultivation(
+      id,
+      updateCultivationDto,
+    );
+    return { data: updatedCultivation };
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -112,11 +73,6 @@ export class CultivationController {
     machine: Machine[];
     message: string;
   }> {
-    try {
-      return this.cultivationService.deleteCultivationById(id);
-    } catch (error) {
-      console.error("Error deleting cultivation:", error);
-      throw new NotFoundException("Failed to delete cultivation");
-    }
+    return this.cultivationService.deleteCultivationById(id);
   }
 }

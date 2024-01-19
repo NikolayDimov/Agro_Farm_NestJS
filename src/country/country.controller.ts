@@ -7,7 +7,6 @@ import {
   Delete,
   Body,
   Param,
-  NotFoundException,
   ParseUUIDPipe,
 } from "@nestjs/common";
 import { CountryService } from "./country.service";
@@ -25,38 +24,17 @@ export class CountryController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("/createCountry")
   async createCountry(@Body() createCountryDto: CreateCountryDto) {
-    try {
-      return this.countryService.createCountry(createCountryDto);
-    } catch (error) {
-      console.error("Error creating country", error);
-      return { success: false, message: error.message };
-    }
+    return this.countryService.createCountry(createCountryDto);
   }
 
   @Get("getAllCountries")
   async getAllCountries() {
-    try {
-      return this.countryService.findAll();
-    } catch (error) {
-      console.error("Error fetching all countries:", error);
-      if (error instanceof NotFoundException) {
-        return { error: "Farm not found" };
-      }
-      return { success: false, message: error.message };
-    }
+    return this.countryService.findAll();
   }
 
   @Get(":id")
   async getCountryById(@Param("id", ParseUUIDPipe) id: string) {
-    try {
-      return this.countryService.findById(id);
-    } catch (error) {
-      console.error("Error fetching country by ID:", error);
-      if (error instanceof NotFoundException) {
-        return { error: "Farm not found" };
-      }
-      return { success: false, message: error.message };
-    }
+    return this.countryService.findById(id);
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -65,15 +43,7 @@ export class CountryController {
     @Param("id", ParseUUIDPipe) id: string,
     @Body() updateCountryDto: UpdateCountryDto,
   ) {
-    try {
-      return this.countryService.updateCountry(id, updateCountryDto);
-    } catch (error) {
-      console.error("Error updating country:", error);
-      if (error instanceof NotFoundException) {
-        return { error: "Farm not found" };
-      }
-      return { success: false, message: error.message };
-    }
+    return this.countryService.updateCountry(id, updateCountryDto);
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -81,12 +51,7 @@ export class CountryController {
   async deleteCountryById(
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
-    try {
-      return this.countryService.deleteCountryById(id);
-    } catch (error) {
-      console.error("Error deleting country:", error);
-      throw new NotFoundException("Failed to delete country");
-    }
+    return this.countryService.deleteCountryById(id);
   }
 
   @Roles(UserRole.OWNER)
@@ -94,16 +59,11 @@ export class CountryController {
   async permanentlyDeleteCountryByIdForOwner(
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
-    try {
-      const userRole = UserRole.OWNER;
+    const userRole = UserRole.OWNER;
 
-      return this.countryService.permanentlyDeleteCountryByIdForOwner(
-        id,
-        userRole,
-      );
-    } catch (error) {
-      console.error("Error permanently deleting country:", error);
-      throw new NotFoundException("Failed to permanently delete country");
-    }
+    return this.countryService.permanentlyDeleteCountryByIdForOwner(
+      id,
+      userRole,
+    );
   }
 }

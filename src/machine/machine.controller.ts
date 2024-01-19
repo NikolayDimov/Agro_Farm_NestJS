@@ -25,38 +25,23 @@ export class MachineController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("/createMachine")
   async createMachine(@Body() createMachineDto: CreateMachineDto) {
-    try {
-      return this.machineService.createMachine(createMachineDto);
-    } catch (error) {
-      console.error("Error creating machine:", error);
-      return { success: false, message: error.message };
-    }
+    return this.machineService.createMachine(createMachineDto);
   }
 
   @Get("getAll")
   async getAllMachines() {
-    try {
-      const machines = await this.machineService.findAll();
-      return { data: machines };
-    } catch (error) {
-      console.error("Error fetching all machines:", error);
-      return { success: false, message: error.message };
-    }
+    const machines = await this.machineService.findAll();
+    return { data: machines };
   }
 
   @Get(":id")
   async getMachineById(@Param("id", ParseUUIDPipe) id: string) {
-    try {
-      const machine = await this.machineService.findById(id);
-      if (!machine) {
-        throw new NotFoundException("Machine not found");
-      }
-
-      return { data: machine };
-    } catch (error) {
-      console.error("Error fetching machine by ID:", error);
-      return { success: false, message: error.message };
+    const machine = await this.machineService.findById(id);
+    if (!machine) {
+      throw new NotFoundException("Machine not found");
     }
+
+    return { data: machine };
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -65,12 +50,7 @@ export class MachineController {
     @Param("id", ParseUUIDPipe) id: string,
     @Body() updateMachineDto: UpdateMachineDto,
   ) {
-    try {
-      return this.machineService.updateMachine(id, updateMachineDto);
-    } catch (error) {
-      console.error("Error updating machine:", error);
-      return { success: false, message: error.message };
-    }
+    return this.machineService.updateMachine(id, updateMachineDto);
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -82,12 +62,7 @@ export class MachineController {
     registerNumber: string;
     message: string;
   }> {
-    try {
-      return this.machineService.deleteMachineById(id);
-    } catch (error) {
-      console.error("Error deleting machine:", error);
-      throw new NotFoundException("Failed to delete machine");
-    }
+    return this.machineService.deleteMachineById(id);
   }
 
   @Roles(UserRole.OWNER)
@@ -101,17 +76,12 @@ export class MachineController {
     registerNumber: string;
     message: string;
   }> {
-    try {
-      const userRole = UserRole.OWNER;
+    const userRole = UserRole.OWNER;
 
-      return this.machineService.permanentlyDeleteMachineByIdForOwner(
-        id,
-        userRole,
-      );
-    } catch (error) {
-      console.error("Error permanently deleting machine:", error);
-      throw new NotFoundException("Failed to permanently delete machine");
-    }
+    return this.machineService.permanentlyDeleteMachineByIdForOwner(
+      id,
+      userRole,
+    );
   }
 }
 

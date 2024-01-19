@@ -5,7 +5,6 @@ import {
   Delete,
   Param,
   UseGuards,
-  NotFoundException,
   ParseUUIDPipe,
   //Patch,
 } from "@nestjs/common";
@@ -26,15 +25,9 @@ export class CultivationTypeController {
   async createCultivation(
     @Body() createCultivationTypeDto: CreateCultivationTypeDto,
   ) {
-    try {
-      return this.cultivationTypeService.createCultivationType(
-        createCultivationTypeDto,
-      );
-    } catch (error) {
-      console.error("Error creating cultivation type", error);
-      const errorMessage = error?.response?.message || "An error occurred";
-      return { error: errorMessage };
-    }
+    return this.cultivationTypeService.createCultivationType(
+      createCultivationTypeDto,
+    );
   }
 
   // @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -43,15 +36,10 @@ export class CultivationTypeController {
   //   @Param("id") id: string,
   //   @Body() updateCultivationTypeDto: UpdateCultivationTypeDto,
   // ) {
-  //   try {
   //     return this.cultivationTypeService.updateCultivationType(
   //       id,
   //       updateCultivationTypeDto,
   //     );
-  //   } catch (error) {
-  //     console.error("Error updating cultivation type:", error);
-  //     return { success: false, message: error.message };
-  //   }
   // }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -61,11 +49,6 @@ export class CultivationTypeController {
     name: string;
     message: string;
   }> {
-    try {
-      return this.cultivationTypeService.deleteCultivationTypeById(id);
-    } catch (error) {
-      console.error("Error deleting cultivation type:", error);
-      throw new NotFoundException("Failed to delete cultivation type");
-    }
+    return this.cultivationTypeService.deleteCultivationTypeById(id);
   }
 }

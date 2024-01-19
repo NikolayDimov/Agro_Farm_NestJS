@@ -7,7 +7,6 @@ import {
   Param,
   Get,
   Delete,
-  NotFoundException,
   ParseUUIDPipe,
 } from "@nestjs/common";
 import { CreateFarmCountryNameDto } from "./dtos/create-farm-countryName.dto";
@@ -29,26 +28,16 @@ export class FarmController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("/createFarm")
   async createFarm(@Body() createFarmOnlyDto: CreateFarmOnlyDto) {
-    try {
-      return this.farmService.createFarmOnly(createFarmOnlyDto);
-    } catch (error) {
-      console.error("Error creating farm with country:", error);
-      return { success: false, message: error.message };
-    }
+    return this.farmService.createFarmOnly(createFarmOnlyDto);
   }
 
   //Cteare Farm and create new Country. If there is no Country - create new Country. If there is a Country - select from existing Country
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("createFarmWithCountry")
   async createFarmWithCountry(@Body() createFarmDto: CreateFarmCountryNameDto) {
-    try {
-      const createdFarm =
-        await this.farmService.createFarmWithCountry(createFarmDto);
-      return { data: createdFarm };
-    } catch (error) {
-      console.error("Error creating farm with country:", error);
-      return { success: false, message: error.message };
-    }
+    const createdFarm =
+      await this.farmService.createFarmWithCountry(createFarmDto);
+    return { data: createdFarm };
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -57,43 +46,23 @@ export class FarmController {
     @Body() createFarmCountryIdDto: CreateFarmCountryIdDto,
   ) {
     console.log("Received request payload:", createFarmCountryIdDto);
-    try {
-      const createdFarm = await this.farmService.createFarmWithCountryId(
-        createFarmCountryIdDto,
-      );
-      return { data: createdFarm };
-    } catch (error) {
-      console.error("Error creating farm with country:", error);
-      return { success: false, message: error.message };
-    }
+
+    const createdFarm = await this.farmService.createFarmWithCountryId(
+      createFarmCountryIdDto,
+    );
+    return { data: createdFarm };
   }
 
   @Get("getAll")
   async getAllFarms() {
-    try {
-      const transformedFarms = await this.farmService.findAllWithCountries();
-      return { data: transformedFarms };
-    } catch (error) {
-      console.error("Error fetching farms:", error);
-      if (error instanceof NotFoundException) {
-        return { error: "No farms found" };
-      }
-      return { success: false, message: error.message };
-    }
+    const transformedFarms = await this.farmService.findAllWithCountries();
+    return { data: transformedFarms };
   }
 
   @Get(":id")
   async getFarmById(@Param("id", ParseUUIDPipe) id: string) {
-    try {
-      const transformedFarm = await this.farmService.findById(id);
-      return { data: transformedFarm };
-    } catch (error) {
-      console.error("Error fetching farm:", error);
-      if (error instanceof NotFoundException) {
-        return { error: "No farm found" };
-      }
-      return { success: false, message: error.message };
-    }
+    const transformedFarm = await this.farmService.findById(id);
+    return { data: transformedFarm };
   }
 
   // Update Farm with CountryName
@@ -103,19 +72,11 @@ export class FarmController {
   //   @Param("id") id: string,
   //   @Body() updateFarmCountryNameDto: UpdateFarmCountryNameDto,
   // ) {
-  //   try {
   //     const updatedFarm = await this.farmService.updateFarmCountryName(
   //       id,
   //       updateFarmCountryNameDto,
   //     );
   //     return { data: updatedFarm };
-  //   } catch (error) {
-  //     console.error("Error updating farm:", error);
-  //     if (error instanceof NotFoundException) {
-  //       return { error: "Farm not found" };
-  //     }
-  //     return { success: false, message: error.message };
-  //   }
   // }
 
   // Update Farm with CountryID
@@ -125,19 +86,11 @@ export class FarmController {
     @Param("id", ParseUUIDPipe) id: string,
     @Body() updateFarmCountryIdDto: UpdateFarmCountryIdDto,
   ) {
-    try {
-      const updatedFarm = await this.farmService.updateFarmCountryId(
-        id,
-        updateFarmCountryIdDto,
-      );
-      return { data: updatedFarm };
-    } catch (error) {
-      console.error("Error updating farm:", error);
-      if (error instanceof NotFoundException) {
-        return { error: "Farm not found" };
-      }
-      return { success: false, message: error.message };
-    }
+    const updatedFarm = await this.farmService.updateFarmCountryId(
+      id,
+      updateFarmCountryIdDto,
+    );
+    return { data: updatedFarm };
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -145,12 +98,7 @@ export class FarmController {
   async deleteFarmOnlyById(
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
-    try {
-      return this.farmService.deleteFarmOnlyById(id);
-    } catch (error) {
-      console.error("Error deleting farm:", error);
-      throw new NotFoundException("Failed to delete farm");
-    }
+    return this.farmService.deleteFarmOnlyById(id);
   }
 
   @Roles(UserRole.OWNER)
@@ -158,13 +106,8 @@ export class FarmController {
   async permanentlyDeletefarmByIdForOwner(
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
-    try {
-      const userRole = UserRole.OWNER;
+    const userRole = UserRole.OWNER;
 
-      return this.farmService.permanentlyDeletefarmByIdForOwner(id, userRole);
-    } catch (error) {
-      console.error("Error permanently deleting farm:", error);
-      throw new NotFoundException("Failed to permanently delete farm");
-    }
+    return this.farmService.permanentlyDeletefarmByIdForOwner(id, userRole);
   }
 }

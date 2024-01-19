@@ -3,7 +3,6 @@ import {
   ValidationPipe,
   Body,
   Post,
-  NotFoundException,
   Delete,
   Param,
   UseGuards,
@@ -26,14 +25,9 @@ export class GrowingPeriodController {
   async createGrowingPeriod(
     @Body(ValidationPipe) createGrowingPeriodDto: CreateGrowingPeriodDto,
   ): Promise<GrowingPeriod> {
-    try {
-      return this.growingPeriodService.createGrowingPeriod(
-        createGrowingPeriodDto,
-      );
-    } catch (error) {
-      console.error("Error creating country", error);
-      throw new NotFoundException("Failed to delete country");
-    }
+    return this.growingPeriodService.createGrowingPeriod(
+      createGrowingPeriodDto,
+    );
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -41,11 +35,6 @@ export class GrowingPeriodController {
   async deleteFieldById(
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; message: string }> {
-    try {
-      return this.growingPeriodService.deleteGrowingPeriodById(id);
-    } catch (error) {
-      console.error("Error deleting growing period:", error);
-      throw new NotFoundException("Failed to delete growing period");
-    }
+    return this.growingPeriodService.deleteGrowingPeriodById(id);
   }
 }

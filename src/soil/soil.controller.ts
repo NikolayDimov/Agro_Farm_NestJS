@@ -25,37 +25,22 @@ export class SoilController {
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
   @Post("/createSoil")
   async createSoil(@Body() createSoilDto: CreateSoilDto) {
-    try {
-      return this.soilService.createSoil(createSoilDto);
-    } catch (error) {
-      console.error("Error creating soil:", error);
-      return { success: false, message: error.message };
-    }
+    return this.soilService.createSoil(createSoilDto);
   }
 
   @Get("getAll")
   async getAllSoils() {
-    try {
-      const soils = await this.soilService.findAll();
-      return { data: soils };
-    } catch (error) {
-      console.error("Error fetching all soils:", error);
-      return { success: false, message: error.message };
-    }
+    const soils = await this.soilService.findAll();
+    return { data: soils };
   }
 
   @Get(":id")
   async getSoilById(@Param("id", ParseUUIDPipe) id: string) {
-    try {
-      const soil = await this.soilService.findById(id);
-      if (!soil) {
-        throw new NotFoundException("Soil not found");
-      }
-      return { data: soil };
-    } catch (error) {
-      console.error("Error fetching soil by ID:", error);
-      return { success: false, message: error.message };
+    const soil = await this.soilService.findById(id);
+    if (!soil) {
+      throw new NotFoundException("Soil not found");
     }
+    return { data: soil };
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -64,12 +49,7 @@ export class SoilController {
     @Param("id", ParseUUIDPipe) id: string,
     @Body() updateSoilDto: UpdateSoilDto,
   ) {
-    try {
-      return this.soilService.updateSoil(id, updateSoilDto);
-    } catch (error) {
-      console.error("Error updating soil:", error);
-      return { success: false, message: error.message };
-    }
+    return this.soilService.updateSoil(id, updateSoilDto);
   }
 
   @Roles(UserRole.OWNER, UserRole.OPERATOR)
@@ -77,12 +57,7 @@ export class SoilController {
   async deleteSoilById(
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
-    try {
-      return this.soilService.deleteSoilById(id);
-    } catch (error) {
-      console.error("Error deleting soil:", error);
-      throw new NotFoundException("Failed to delete soil");
-    }
+    return this.soilService.deleteSoilById(id);
   }
 
   @Roles(UserRole.OWNER)
@@ -90,14 +65,9 @@ export class SoilController {
   async permanentlyDeleteCountryByIdForOwner(
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ id: string; name: string; message: string }> {
-    try {
-      const userRole = UserRole.OWNER;
+    const userRole = UserRole.OWNER;
 
-      return this.soilService.permanentlyDeleteSoilByIdForOwner(id, userRole);
-    } catch (error) {
-      console.error("Error permanently deleting country:", error);
-      throw new NotFoundException("Failed to permanently delete country");
-    }
+    return this.soilService.permanentlyDeleteSoilByIdForOwner(id, userRole);
   }
 }
 
